@@ -8,7 +8,6 @@ gitlink_sources = [
   'vala-ui/RepoCloneDialog.vala',
   'vala-helper/JsonEngine.vala',
   'vala-helper/ListModels.vala',
-  'vala-helper/CommandRunner.vala',
   'vala-helper/AccountsListModel.vala',
   'vala-helper/ReposListModel.vala',
   'vala-git/Git.vala',

@@ -1,6 +1,6 @@
 /* application.vala
  *
- * Copyright 2024 Ansif
+ * Copyright 2023 Ansif
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -34,12 +34,14 @@ namespace Gitlink {
             this.set_accels_for_action ("app.quit", {"<primary>q"});
         }
 
+        public new static Application get_default() {
+            return GLib.Application.get_default () as Application;
+        }
+
         public override void activate () {
             base.activate ();
             var win = this.active_window;
-            if (win == null) {
-                win = new Gitlink.Window (this);
-            }
+            if (win == null) win = new Gitlink.Window (this);
             win.present ();
         }
 
@@ -47,12 +49,12 @@ namespace Gitlink {
             string[] developers = { "Ansif" };
             var about = new Adw.AboutWindow () {
                 transient_for = this.active_window,
-                application_name = "gitlink",
+                application_name = "GitLink",
                 application_icon = "com.asiet.lab.GitLink",
                 developer_name = "Ansif",
                 version = "0.1.0",
                 developers = developers,
-                copyright = "© 2024 Ansif",
+                copyright = "© 2023 Ansif",
             };
 
             about.present ();

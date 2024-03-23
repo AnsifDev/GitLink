@@ -1,0 +1,33 @@
+using Gtk 4.0;
+using Adw 1;
+
+template $GitlinkHomePage: Adw.NavigationPage {
+  title: "Accounts";
+  tag: "home";
+
+  Adw.ToolbarView {
+      [top]
+      Adw.HeaderBar {
+        show-back-button: false;
+      }
+
+      content: Gtk.ScrolledWindow {
+        vexpand: true;
+        
+        Adw.Clamp {
+          maximum-size: 400;
+          tightening-threshold: 200;
+
+          Box {
+            orientation: vertical;
+
+            ListBox list_box {
+              margin-top: 192;
+              styles ["navigation-sidebar"]
+              selection-mode: single;
+            }
+          }
+        }
+      };
+  }
+}

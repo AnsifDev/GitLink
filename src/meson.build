@@ -1,23 +1,46 @@
 gitlink_sources = [
   'main.vala',
   'application.vala',
-  'window.vala',
+  'vala-ui/window.vala',
+  'vala-ui/UserPage.vala',
+  'vala-ui/HomePage.vala',
+  'vala-ui/DisplayCard.vala',
+  'vala-ui/RepoCloneDialog.vala',
+  'vala-helper/JsonEngine.vala',
+  'vala-helper/ListModels.vala',
+  'vala-helper/CommandRunner.vala',
+  'vala-helper/AccountsListModel.vala',
+  'vala-helper/ReposListModel.vala',
+  'vala-git/Git.vala',
+  'vala-git/GitUser.vala',
+  'vala-git/GitClient.vala',
+  'vala-git/GitRepo.vala',
 ]
 
 gitlink_deps = [
   dependency('gtk4'),
-  dependency('libadwaita-1', version: '>= 1.4'),
+  dependency('gee-0.8'),
+  dependency('gio-2.0'),
+  dependency('json-glib-1.0'),
+  dependency('libsoup-3.0'),
+  dependency('libportal-gtk4'),
+  dependency('libadwaita-1', version: '>= 1.2'),
 ]
 
 blueprints_src = [
-    'window.blp'
+    'window.blp',
+    'user_page.blp',
+    'home_page.blp',
+    'display_card.blp',
+    'repos_row.blp',
+    'repo_clone_dialog.blp'
 ]
 
 blueprints_ui = []
 blueprints_vala = []
 blueprints_src_path = []
 foreach b : blueprints_src
-  blueprints_src_path += b
+  blueprints_src_path += 'gtk/' + b
 	blueprints_ui += b.replace('.blp', '.ui')
 	blueprints_vala += b + '.vala'
 endforeach

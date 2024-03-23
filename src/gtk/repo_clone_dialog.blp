@@ -1,0 +1,51 @@
+using Gtk 4.0;
+using Adw 1;
+
+template $GitlinkRepoCloneDialog: Adw.Window {
+  default-width: 413;
+  default-height: 550;
+  width-request: 400;
+  height-request: 534;
+  resizable: false;
+
+  Adw.ToolbarView {
+    [top]
+    Adw.HeaderBar {
+      [start]
+      Gtk.ToggleButton search_btn {
+        icon-name: "system-search";
+        tooltip-text: "Start Search";
+      }
+    }
+
+    [top]
+    SearchBar search_bar {
+      search-mode-enabled: bind search_btn.active bidirectional;
+      key-capture-widget: template;
+      styles ["inline"]
+      SearchEntry acc_search_entry {
+        hexpand: true;
+        search-delay: 350;
+        activates-default: true;
+        placeholder-text: "Search Accounts";
+      }
+    }
+
+    content: Gtk.ScrolledWindow {
+      hscrollbar-policy: never;
+
+      Box {
+        orientation: vertical;
+        margin-bottom: 8;
+        margin-start: 8;
+        margin-end: 8;
+        margin-top: 8;
+
+        ListBox list_box {
+          styles["boxed-list"]
+          selection-mode: none;
+        }
+      }
+    };
+  }
+}

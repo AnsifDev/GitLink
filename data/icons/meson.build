@@ -6,8 +6,17 @@ install_data(
   install_dir: get_option('datadir') / 'icons' / scalable_dir
 )
 
-symbolic_dir = 'hicolor' / 'symbolic' / 'apps'
+symbolic_dir = join_paths('hicolor', 'symbolic', 'apps')
 install_data(
-  symbolic_dir / ('@0@-symbolic.svg').format(application_id),
+  [
+    join_paths(symbolic_dir, ('@0@-symbolic.svg').format(application_id)),
+    join_paths(symbolic_dir, ('settings-symbolic.svg')),
+    join_paths(symbolic_dir, ('arrow-into-box-symbolic.svg')),
+    join_paths(symbolic_dir, ('chain-link-symbolic.svg')),
+    join_paths(symbolic_dir, ('earth-symbolic.svg')),
+    join_paths(symbolic_dir, ('user-trash-symbolic.svg')),
+    join_paths(symbolic_dir, ('application-exit-rtl-symbolic.svg')),
+    join_paths(symbolic_dir, ('view-refresh-symbolic.svg')),
+  ],
   install_dir: get_option('datadir') / 'icons' / symbolic_dir
 )

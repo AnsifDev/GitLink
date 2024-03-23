@@ -40,6 +40,22 @@
             ]
         },
         {
+            "name": "libportal-gtk4",
+            "buildsystem": "meson",
+            "config-opts" : [
+                "-Ddocs=false",
+                "-Dvapi=true",
+                "-Dintrospection=true"
+            ],
+            "sources": [
+                {
+                    "type": "git",
+                    "url": "https://github.com/flatpak/libportal.git",
+                    "tag": "0.7.1"
+                }
+            ]
+        },
+        {
             "name" : "gitlink",
             "builddir" : true,
             "buildsystem" : "meson",

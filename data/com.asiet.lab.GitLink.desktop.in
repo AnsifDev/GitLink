@@ -1,5 +1,5 @@
 [Desktop Entry]
-Name=gitlink
+Name=GitLink
 Exec=gitlink
 Icon=com.asiet.lab.GitLink
 Terminal=false

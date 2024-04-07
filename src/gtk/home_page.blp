@@ -9,6 +9,14 @@ template $GitlinkHomePage: Adw.NavigationPage {
       [top]
       Adw.HeaderBar {
         show-back-button: false;
+
+        [end]
+        Button {
+          icon-name: "list-add-symbolic";
+          clicked => $login();
+
+          tooltip-text: "Add New User Account";
+        }
       }
 
       content: Gtk.ScrolledWindow {

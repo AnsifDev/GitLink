@@ -6,6 +6,7 @@ gitlink_sources = [
   'vala-ui/HomePage.vala',
   'vala-ui/DisplayCard.vala',
   'vala-ui/RepoCloneDialog.vala',
+  'vala-ui/LoginDialog.vala',
   'vala-helper/JsonEngine.vala',
   'vala-helper/ListModels.vala',
   'vala-helper/AccountsListModel.vala',
@@ -32,6 +33,7 @@ blueprints_src = [
     'home_page.blp',
     'display_card.blp',
     'repos_row.blp',
+    'login_dialog.blp',
     'repo_clone_dialog.blp'
 ]
 

@@ -1,12 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <gresources>
   <gresource prefix="/com/asiet/lab/GitLink">
+    <file>style.css</file>
     <file>gtk/window.ui</file>
     <file>gtk/user_page.ui</file>
     <file>gtk/home_page.ui</file>
     <file>gtk/display_card.ui</file>
     <file>gtk/repos_row.ui</file>
     <file>gtk/repo_clone_dialog.ui</file>
+    <file>gtk/login_dialog.ui</file>
     <file preprocess="xml-stripblanks">gtk/help-overlay.ui</file>
   </gresource>
 </gresources>

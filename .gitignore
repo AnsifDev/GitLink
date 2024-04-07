@@ -3,3 +3,4 @@ _build
 .flatpak-builder
 .vscode
 src.old
+test.http

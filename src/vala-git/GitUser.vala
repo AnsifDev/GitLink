@@ -3,7 +3,7 @@ using Gee, Gitlink;
 namespace Git {
     public class User: Object {
         public int64 id { get; private set; }
-        public string? token { get; private set; }
+        public string? token { get; internal set; }
         public string name { get; private set; }
         public string url { get; private set; }
         public string username { get; private set; }
@@ -11,7 +11,7 @@ namespace Git {
         public string avatar_url { get; private set; }
         public int64 followers { get; private set; }
         public int64 following { get; private set; }
-        public ArrayList<Value?>? local_repos { get; private set; }
+        public ArrayList<Value?> local_repos { get; private set; }
         
         internal User(HashMap<string, Value?> data_map) {
             id = (int64) data_map["id"];
@@ -43,6 +43,7 @@ namespace Git {
             followers = (int64) data_map["followers"];
             following = (int64) data_map["followers"];
             if (data_map.has_key ("local_repos")) local_repos = data_map["local_repos"] as ArrayList<Value?>;
+            else if (local_repos == null) local_repos = new ArrayList<Value?>();
         }
 
         public HashMap<string, Value?> to_hashmap() {
@@ -55,7 +56,7 @@ namespace Git {
             data["avatar_url"] = avatar_url;
             data["followers"] = followers;
             data["followers"] = followers;
-            data["local_repos"] = local_repos;
+            if (local_repos != null) data["local_repos"] = local_repos;
 
             return data;
         }

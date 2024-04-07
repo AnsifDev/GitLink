@@ -1,0 +1,193 @@
+using Gtk 4.0;
+using Adw 1;
+
+template $GitlinkLoginDialog : Adw.Window {
+  default-width: 350;
+  default-height: 550;
+  resizable: false;
+
+  Adw.NavigationView nav_view {
+    Adw.NavigationPage start_page {
+      title: "Login Account";
+      tag: "start";
+
+      Adw.ToolbarView {
+        [top]
+        Adw.HeaderBar {
+          show-title: false;
+        }
+
+        content: Box {
+          orientation: vertical;
+          hexpand: true;
+          vexpand: true;
+          valign: fill;
+          spacing: 16;
+          margin-start: 32;
+          margin-end: 32;
+          margin-bottom: 16;
+
+          Image {
+            icon-name: "avatar-default-symbolic";
+            pixel-size: 100;
+            margin-top: 64;
+          }
+
+          Label {
+            margin-top: 32;
+            label: "Add Account";
+            styles ["title-1"]
+          }
+
+          Label {
+            wrap: true;
+            label: "Connect your Github Account with GitLink App to Access all your works and get things synced";
+          }
+
+          Adw.Bin {
+            vexpand: true;
+          }
+        };
+
+        [bottom]
+        Box {
+          orientation: horizontal;
+          margin-start: 16;
+          margin-end: 16;
+          margin-bottom: 16;
+          halign: end;
+
+          Button btn_start_next {
+            sensitive: false;
+            label: "Setting Up";
+            styles ["pill", "suggested-action"]
+            clicked => $start_next();
+          }
+        }
+        
+      }
+    }
+
+    Adw.NavigationPage code_page {
+      title: "Login Account";
+      tag: "code";
+
+      Adw.ToolbarView {
+        [top]
+        Adw.HeaderBar {
+          show-title: false;
+        }
+
+        content: Box {
+          orientation: vertical;
+          hexpand: true;
+          vexpand: true;
+          valign: center;
+          spacing: 16;
+          margin-start: 32;
+          margin-end: 32;
+          margin-bottom: 16;
+
+          Label {
+            margin-top: 32;
+            label: "Copy Code";
+            styles ["title-1"]
+          }
+
+          Label {
+            wrap: true;
+            label: "All you need is to copy code on web and login there. We will handle the rest";
+          }
+
+          Adw.Bin {
+            styles ["my-small-frame"]
+            halign: center;
+            
+            Gtk.Box {
+              halign: start;
+              margin-top: 6;
+              margin-bottom: 6;
+              margin-start: 6;
+              margin-end: 6;
+              spacing: 6;
+
+              Label {
+                margin-start: 6;
+                halign: start;
+                label: bind template.user_code;
+              }
+
+              Button {
+                icon-name: "edit-copy-symbolic";
+                styles ["flat"]
+              }
+            }
+          }
+        };
+
+        [bottom]
+        Box {
+          orientation: horizontal;
+          margin-start: 16;
+          margin-end: 16;
+          margin-bottom: 16;
+          halign: end;
+
+          Button {
+            label: "Next";
+            styles ["pill", "suggested-action"]
+            clicked => $code_next();
+          }
+        }
+        
+      }
+    }
+
+    Adw.NavigationPage user_config_page {
+      title: "Login Account";
+      tag: "user_config";
+
+      Adw.ToolbarView {
+        [top]
+        Adw.HeaderBar {
+          show-title: false;
+        }
+
+        content: Box {
+          orientation: vertical;
+          hexpand: true;
+          vexpand: true;
+          valign: center;
+          spacing: 16;
+          margin-start: 32;
+          margin-end: 32;
+          margin-bottom: 16;
+
+          Label {
+            margin-top: 32;
+            label: "Welcome Back";
+            styles ["title-1"]
+          }
+
+          
+        };
+
+        [bottom]
+        Box {
+          orientation: horizontal;
+          margin-start: 16;
+          margin-end: 16;
+          margin-bottom: 16;
+          halign: end;
+
+          Button {
+            label: "Next";
+            styles ["pill", "suggested-action"]
+            clicked => $code_next();
+          }
+        }
+        
+      }
+    }
+  }
+}

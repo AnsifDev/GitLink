@@ -163,7 +163,10 @@ namespace Git {
 
                 var json_engine = new JsonEngine();
                 var data_map = json_engine.parse_string_to_hashmap(response);
-                return new Repository(data_map);
+                var repo = new Repository(data_map);
+                
+                repo_store.add(repo);
+                return repo;
             } catch (Error e) { printerr(@"ERR: $(e.message)\n"); }
 
             return null;
@@ -215,10 +218,67 @@ namespace Git {
 
                 var json_engine = new JsonEngine();
                 var data_map = json_engine.parse_string_to_hashmap(response);
-                return new User(data_map);
+                var user = new User(data_map); 
+                
+                user_store.add(user);
+                return user;
             } catch (Error e) { printerr(@"ERR: $(e.message)\n"); }
 
             return null;
+        }
+
+        public async User? authenticate (string device_code, int expire, int interval) throws Error {
+            print(@"Processing Request authenticate\n");
+            HashMap<string, Value?> response_map = null;
+
+            for (int i = 0; i < expire/(interval*2); i++) {
+                print("\t* Polling for Authorization: ");
+                var url = @"https://github.com/login/oauth/access_token?client_id=fe459acb22155ceef1f6&device_code=$device_code&grant_type=urn:ietf:params:oauth:grant-type:device_code";
+
+                var msg = new Soup.Message("POST", url);
+                msg.request_headers.append("Accept", "application/vnd.github+json");
+                msg.request_headers.append("User-Agent", "HashFolder");
+
+                var session = new Soup.Session();
+                var response_bytes = yield session.send_and_read_async(msg, 0, null);
+                var response = (string) response_bytes.get_data();
+                response_map = new JsonEngine().parse_string_to_hashmap(response);
+
+                if (!response_map.has_key("error")) break;
+                else if (response_map["error"] != "authorization_pending") break;
+
+                print(" [Not Authenticated]\n");
+                Timeout.add_seconds_once(interval*2, () => { authenticate.callback(); });
+                yield;
+            }
+
+            if (response_map.has_key("error")) return null;
+
+            print(" [Authenticated]\n");
+            print("\t* Fetching User Account Details\n");
+            var token = (string) response_map["access_token"];
+            var url = "https://api.github.com/user";
+
+            var msg = new Soup.Message("GET", url);
+            msg.request_headers.append("Accept", "application/vnd.github+json");
+            msg.request_headers.append("Authorization", @"Bearer $token");
+            msg.request_headers.append("User-Agent", "HashFolder");
+
+            var session = new Soup.Session();
+            var response_bytes = yield session.send_and_read_async(msg, 0, null);
+            var response = (string) response_bytes.get_data();
+
+            var user_map = new JsonEngine().parse_string_to_hashmap(response);
+
+            print("\t* Registering User Account\n");
+            var user = new User(user_map);
+            user.token = token;
+
+            user_store.add(user);
+            local_users.add(user.id);
+
+            print(@"Processing Request authenticate\t\t[OK]\n");
+            return user;
         }
     }
 }

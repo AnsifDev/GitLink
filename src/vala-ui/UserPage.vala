@@ -71,7 +71,7 @@ namespace Gitlink {
                     return;
                 }
  
-                foreach (var repo in local_repos) remote_repositories.remove(repo);
+                //  foreach (var repo in local_repos) remote_repositories.remove(repo);
                 if (remote_repositories.size > 0) {
                     remote_repos.visible = true;
                     remote_repo_list.bind_model(new ReposListModel(remote_repositories), (item) => item as Widget);

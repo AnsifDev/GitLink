@@ -35,5 +35,10 @@ namespace Gitlink {
         public signal void push_page(Adw.NavigationPage page);
         
         public signal bool close_page();
+
+        [GtkCallback]
+        public void login() {
+            print("Login Clicked\n");
+        }
     }
 }

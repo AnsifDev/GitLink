@@ -227,7 +227,7 @@ namespace Git {
             return null;
         }
 
-        public async User? authenticate (string device_code, int expire, int interval) throws Error {
+        public async User authenticate (string device_code, int expire, int interval) throws Error {
             print(@"Processing Request authenticate\n");
             HashMap<string, Value?> response_map = null;
 
@@ -252,7 +252,10 @@ namespace Git {
                 yield;
             }
 
-            if (response_map.has_key("error")) return null;
+            if (response_map.has_key("error")) {
+                print("[Cancelled or Failed]\n");
+                throw new Error(GLib.Quark.from_string("ERR_REJECTED"), 1, @"$(response_map["error"].get_string())");
+            };
 
             print(" [Authenticated]\n");
             print("\t* Fetching User Account Details\n");

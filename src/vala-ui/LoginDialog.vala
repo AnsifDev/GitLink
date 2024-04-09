@@ -8,10 +8,13 @@ namespace Gitlink {
         private unowned Adw.NavigationView nav_view;
         
         [GtkChild]
-        private unowned Button btn_start_next;
+        private unowned Button btn_authorize;
+        
+        [GtkChild]
+        private unowned Adw.ToastOverlay toast_overlay;
 
         private string? device_code = null;
-        public string? user_code { get; private set; default = null; }
+        public string? user_code { get; private set; default = "OCSD-12DE"; }
         private int64? interval = null;
         private int64? expire = null;
         private bool polling = false;
@@ -28,21 +31,24 @@ namespace Gitlink {
                     interval = (int64) response_map["interval"];
                     expire = (int64) response_map["expires_in"];
 
-                    btn_start_next.sensitive = true;
-                    btn_start_next.label = "Next";
+                    btn_authorize.sensitive = true;
+                    btn_authorize.label = "Authorize";
                 } catch (Error e) { print(e.message); }
             });
         }
 
-        public signal void success();
+        public signal void success(Git.User user);
 
         [GtkCallback]
-        private void start_next() {
-            nav_view.push_by_tag("code");
+        private void copy_code() {
+            var clipboard = get_clipboard();
+            clipboard.set_text(user_code);
+            var toast = new Adw.Toast(@"User Code $user_code Copied");
+            toast_overlay.add_toast(toast);
         }
 
         [GtkCallback]
-        private void code_next() {
+        private void authorize() {
             var launcher = new UriLauncher("https://github.com/login/device");
             launcher.launch.begin(this, null);
             if (!polling) {
@@ -51,18 +57,16 @@ namespace Gitlink {
                 client.authenticate.begin(device_code, (int) expire, (int) interval, (src, res) => {
                     try {
                         user = client.authenticate.end(res);
-                        if (user == null) {
-                            var msg = new Adw.MessageDialog(transient_for, "Something Wrong", "Login Failed due some unexpected error");
-                            msg.add_response("ok", "OK");
-                            msg.present();
-                            close();
-                            return;
-                        }
 
-                        //  nav_view.push_by_tag("user_config");
-                        close();
-                        success();
-                    } catch (Error e) { print(e.message); }
+                        nav_view.push_by_tag("user_config");
+                        success(user);
+                    } catch (Error e) {
+                        var msg = new Adw.MessageDialog(transient_for, "Something Wrong", "Login Failed due some unexpected error");
+                        msg.add_response("ok", "OK");
+                        msg.present();
+                    }
+
+                    close();
                 });
             }
         }

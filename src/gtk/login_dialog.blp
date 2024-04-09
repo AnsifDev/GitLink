@@ -6,187 +6,153 @@ template $GitlinkLoginDialog : Adw.Window {
   default-height: 550;
   resizable: false;
 
-  Adw.NavigationView nav_view {
-    Adw.NavigationPage start_page {
-      title: "Login Account";
-      tag: "start";
+  Adw.ToastOverlay toast_overlay {
+    Adw.NavigationView nav_view {
+      Adw.NavigationPage start_page {
+        title: "Add Account";
+        tag: "start";
 
-      Adw.ToolbarView {
-        [top]
-        Adw.HeaderBar {
-          show-title: false;
-        }
-
-        content: Box {
-          orientation: vertical;
-          hexpand: true;
-          vexpand: true;
-          valign: fill;
-          spacing: 16;
-          margin-start: 32;
-          margin-end: 32;
-          margin-bottom: 16;
-
-          Image {
-            icon-name: "avatar-default-symbolic";
-            pixel-size: 100;
-            margin-top: 64;
+        Adw.ToolbarView {
+          [top]
+          Adw.HeaderBar {
+            // show-title: false;
           }
 
-          Label {
-            margin-top: 32;
-            label: "Add Account";
-            styles ["title-1"]
-          }
-
-          Label {
-            wrap: true;
-            label: "Connect your Github Account with GitLink App to Access all your works and get things synced";
-          }
-
-          Adw.Bin {
+          content: Box {
+            orientation: vertical;
+            hexpand: true;
             vexpand: true;
-          }
-        };
+            valign: fill;
+            spacing: 16;
+            margin-start: 32;
+            margin-end: 32;
+            margin-bottom: 16;
 
-        [bottom]
-        Box {
-          orientation: horizontal;
-          margin-start: 16;
-          margin-end: 16;
-          margin-bottom: 16;
-          halign: end;
+            Adw.Avatar {
+              icon-name: "avatar-default-symbolic";
+              size: 100;
+              margin-top: 64;
+            }
 
-          Button btn_start_next {
-            sensitive: false;
-            label: "Setting Up";
-            styles ["pill", "suggested-action"]
-            clicked => $start_next();
-          }
-        }
-        
-      }
-    }
+            Label {
+              margin-top: 32;
+              label: "Connect with GitHub";
+              styles ["title-1"]
+            }
 
-    Adw.NavigationPage code_page {
-      title: "Login Account";
-      tag: "code";
+            Label {
+              wrap: true;
+              halign: fill;
+              label: "Connect your Github Account with GitLink App to Access all your works and get things synced";
+            }
 
-      Adw.ToolbarView {
-        [top]
-        Adw.HeaderBar {
-          show-title: false;
-        }
-
-        content: Box {
-          orientation: vertical;
-          hexpand: true;
-          vexpand: true;
-          valign: center;
-          spacing: 16;
-          margin-start: 32;
-          margin-end: 32;
-          margin-bottom: 16;
-
-          Label {
-            margin-top: 32;
-            label: "Copy Code";
-            styles ["title-1"]
-          }
-
-          Label {
-            wrap: true;
-            label: "All you need is to copy code on web and login there. We will handle the rest";
-          }
-
-          Adw.Bin {
-            styles ["my-small-frame"]
-            halign: center;
-            
-            Gtk.Box {
+            Label {
+              wrap: true;
               halign: start;
-              margin-top: 6;
-              margin-bottom: 6;
-              margin-start: 6;
-              margin-end: 6;
-              spacing: 6;
+              visible: bind btn_authorize.sensitive;
+              label: "Copy the user code below";
+            }
 
-              Label {
-                margin-start: 6;
+            Gtk.Spinner {
+              spinning: bind btn_authorize.sensitive inverted;
+              visible: bind btn_authorize.sensitive inverted;
+              vexpand: true;
+              valign: center;
+            }
+
+            Adw.Bin {
+              styles ["my-small-frame"]
+              halign: center;
+              vexpand: true;
+              valign: center;
+              visible: bind btn_authorize.sensitive;
+              
+              Gtk.Box {
                 halign: start;
-                label: bind template.user_code;
-              }
+                margin-top: 6;
+                margin-bottom: 6;
+                margin-start: 6;
+                margin-end: 6;
+                spacing: 6;
 
-              Button {
-                icon-name: "edit-copy-symbolic";
-                styles ["flat"]
+                Label {
+                  margin-start: 6;
+                  halign: start;
+                  label: bind template.user_code;
+                }
+
+                Button {
+                  icon-name: "edit-copy-symbolic";
+                  styles ["flat"]
+                  clicked => $copy_code();
+                }
               }
             }
+          };
+
+          [bottom]
+          Box {
+            orientation: horizontal;
+            margin-start: 16;
+            margin-end: 16;
+            margin-bottom: 16;
+            halign: end;
+
+            Button btn_authorize {
+              sensitive: false;
+              label: "Setting Up";
+              styles ["pill", "suggested-action"]
+              clicked => $authorize();
+            }
           }
-        };
-
-        [bottom]
-        Box {
-          orientation: horizontal;
-          margin-start: 16;
-          margin-end: 16;
-          margin-bottom: 16;
-          halign: end;
-
-          Button {
-            label: "Next";
-            styles ["pill", "suggested-action"]
-            clicked => $code_next();
-          }
-        }
-        
-      }
-    }
-
-    Adw.NavigationPage user_config_page {
-      title: "Login Account";
-      tag: "user_config";
-
-      Adw.ToolbarView {
-        [top]
-        Adw.HeaderBar {
-          show-title: false;
-        }
-
-        content: Box {
-          orientation: vertical;
-          hexpand: true;
-          vexpand: true;
-          valign: center;
-          spacing: 16;
-          margin-start: 32;
-          margin-end: 32;
-          margin-bottom: 16;
-
-          Label {
-            margin-top: 32;
-            label: "Welcome Back";
-            styles ["title-1"]
-          }
-
           
-        };
-
-        [bottom]
-        Box {
-          orientation: horizontal;
-          margin-start: 16;
-          margin-end: 16;
-          margin-bottom: 16;
-          halign: end;
-
-          Button {
-            label: "Next";
-            styles ["pill", "suggested-action"]
-            clicked => $code_next();
-          }
         }
-        
+      }
+
+      Adw.NavigationPage user_config_page {
+        title: "Login Account";
+        tag: "user_config";
+
+        Adw.ToolbarView {
+          [top]
+          Adw.HeaderBar {
+            show-title: false;
+          }
+
+          content: Box {
+            orientation: vertical;
+            hexpand: true;
+            vexpand: true;
+            valign: center;
+            spacing: 16;
+            margin-start: 32;
+            margin-end: 32;
+            margin-bottom: 16;
+
+            Label {
+              margin-top: 32;
+              label: "Welcome Back";
+              styles ["title-1"]
+            }
+
+            
+          };
+
+          [bottom]
+          Box {
+            orientation: horizontal;
+            margin-start: 16;
+            margin-end: 16;
+            margin-bottom: 16;
+            halign: end;
+
+            Button {
+              label: "Next";
+              styles ["pill", "suggested-action"]
+            }
+          }
+          
+        }
       }
     }
   }

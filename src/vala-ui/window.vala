@@ -43,14 +43,14 @@ namespace Gitlink {
         [GtkCallback]
         public void login() {
             var login = new LoginDialog(this);
-            login.success.connect(() => { 
+            login.success.connect((user) => { 
                 var client = Git.Client.get_default();
                 var local_users = client.load_local_users();
                 var home_page = new HomePage(local_users);
                 home_page.push_page.connect (nav_view.push);
                 home_page.close_page.connect (nav_view.pop);
                 nav_view.push(home_page); 
-                var user_page = new UserPage(local_users[0]);
+                var user_page = new UserPage(user);
                 nav_view.push(user_page); 
             });
             login.present();

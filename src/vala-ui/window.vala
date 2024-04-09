@@ -32,12 +32,12 @@ namespace Gitlink {
             Object (application: app);
             var client = Git.Client.get_default();
             var local_users = client.load_local_users();
-            if (local_users.size > 0) {
-                var home_page = new HomePage(local_users);
-                home_page.push_page.connect (nav_view.push);
-                home_page.close_page.connect (nav_view.pop);
-                nav_view.push(home_page);
-            }
+            //  if (local_users.size > 0) {
+            //      var home_page = new HomePage(local_users);
+            //      home_page.push_page.connect (nav_view.push);
+            //      home_page.close_page.connect (nav_view.pop);
+            //      nav_view.push(home_page);
+            //  }
         }
 
         [GtkCallback]

@@ -135,7 +135,19 @@ template $GitlinkLoginDialog : Adw.Window {
               styles ["title-1"]
             }
 
-            
+            Adw.PreferencesGroup {
+              title: "Git Configuration"
+
+              Adw.ActionRow {
+                title: "Signed In As"
+                subtitle: template.user.username
+              }
+
+              Adw.EntryRow {
+                title: "Signed In As"
+                subtitle: template.user.username
+              }
+            }
           };
 
           [bottom]

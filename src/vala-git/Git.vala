@@ -16,7 +16,7 @@ namespace Git {
         var session = new Soup.Session();
         var response_bytes = yield session.send_and_read_async(msg, 0, null);
         var response = (string) response_bytes.get_data();
-        print(@"Processing GET Request $end_point\t\t[OK]\n");
+        print(@"Processing GET Request $end_point\t\t[$(msg.status_code)]\n");
         return msg.status_code-200 < 100? response: null;
     }
 

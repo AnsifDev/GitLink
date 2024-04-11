@@ -10,7 +10,7 @@ namespace Git {
         public string ssh_url { get; private set; }
         public bool private_repo { get; private set; }
         public string owner { get; private set; }
-        public string description { get; private set; }
+        public string? description { get; private set; }
         public int64 forks { get; private set; }
 
         internal Repository(HashMap<string, Value?> data_map) {
@@ -59,7 +59,7 @@ namespace Git {
             data["private"] = private_repo;
             data["forks"] = forks;
             data["owner"] = owner_map;
-            data["description"] = description;
+            if (description != null) data["description"] = description;
 
             return data;
         }

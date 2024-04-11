@@ -42,8 +42,8 @@ namespace Gitlink {
 
         [GtkCallback]
         public void login() {
-            var login = new LoginDialog(this);
-            login.success.connect((user) => { 
+            var login = new LoginWindow(this);
+            login.authenticated.connect((user) => { 
                 var client = Git.Client.get_default();
                 var local_users = client.load_local_users();
                 var home_page = new HomePage(local_users);

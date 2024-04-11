@@ -8,7 +8,9 @@
     <file>gtk/display_card.ui</file>
     <file>gtk/repos_row.ui</file>
     <file>gtk/repo_clone_dialog.ui</file>
-    <file>gtk/login_dialog.ui</file>
+    <file>gtk/authentication_page.ui</file>
+    <file>gtk/login_window.ui</file>
+    <file>gtk/user_config_page.ui</file>
     <file preprocess="xml-stripblanks">gtk/help-overlay.ui</file>
   </gresource>
 </gresources>

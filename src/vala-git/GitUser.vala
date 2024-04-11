@@ -4,14 +4,15 @@ namespace Git {
     public class User: Object {
         public int64 id { get; private set; }
         public string? token { get; internal set; }
-        public string name { get; private set; }
+        public string name { get; set; }
         public string url { get; private set; }
         public string username { get; private set; }
-        public string email { get; private set; }
+        public string email { get; set; default = ""; }
         public string avatar_url { get; private set; }
         public int64 followers { get; private set; }
         public int64 following { get; private set; }
         public ArrayList<Value?> local_repos { get; private set; }
+        public ArrayList<Value?> remote_repos { get; private set; }
         
         internal User(HashMap<string, Value?> data_map) {
             id = (int64) data_map["id"];
@@ -19,7 +20,7 @@ namespace Git {
             load_configurations();
         }
 
-        public async bool update(HashMap<string, Value?> data) {
+        public async bool update() {
             try {
                 var response = yield request(@"users/$username", null);
                 if (response == null) return false;
@@ -38,12 +39,14 @@ namespace Git {
             username = data_map["login"] as string;
             name = data_map["name"] as string;
             url = data_map["html_url"] as string;
-            email = data_map["email"] as string;
+            if (data_map["email"] != null) email = data_map["email"] as string;
             avatar_url = data_map["avatar_url"] as string;
             followers = (int64) data_map["followers"];
             following = (int64) data_map["followers"];
             if (data_map.has_key ("local_repos")) local_repos = data_map["local_repos"] as ArrayList<Value?>;
             else if (local_repos == null) local_repos = new ArrayList<Value?>();
+            if (data_map.has_key ("remote_repos")) remote_repos = data_map["remote_repos"] as ArrayList<Value?>;
+            else if (remote_repos == null) remote_repos = new ArrayList<Value?>();
         }
 
         public HashMap<string, Value?> to_hashmap() {
@@ -56,7 +59,8 @@ namespace Git {
             data["avatar_url"] = avatar_url;
             data["followers"] = followers;
             data["followers"] = followers;
-            if (local_repos != null) data["local_repos"] = local_repos;
+            data["local_repos"] = local_repos;
+            data["remote_repos"] = remote_repos;
 
             return data;
         }

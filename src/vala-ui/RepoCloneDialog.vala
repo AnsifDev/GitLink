@@ -11,7 +11,7 @@ namespace Gitlink {
             transient_for = Application.get_default().active_window;
 
             var client = Git.Client.get_default();
-            client.load_repositories.begin(user, (src, result) => {
+            client.load_repositories.begin(user, true, (src, result) => {
                 var repos = client.load_repositories.end(result);
                 list_box.bind_model(new ReposListModel(repos), (item) => item as Widget);
             });

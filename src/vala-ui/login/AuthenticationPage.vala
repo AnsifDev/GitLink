@@ -2,28 +2,22 @@ using Gtk;
 using Gee;
 
 namespace Gitlink {
-    [GtkTemplate (ui = "/com/asiet/lab/GitLink/gtk/login_dialog.ui")]
-    public class LoginDialog : Adw.Window {
-        [GtkChild]
-        private unowned Adw.NavigationView nav_view;
-        
+    [GtkTemplate (ui = "/com/asiet/lab/GitLink/gtk/authentication_page.ui")]
+    public class AuthenticationPage : Adw.NavigationPage {
         [GtkChild]
         private unowned Button btn_authorize;
-        
+
         [GtkChild]
         private unowned Adw.ToastOverlay toast_overlay;
 
-        private string? device_code = null;
         public string? user_code { get; private set; default = "OCSD-12DE"; }
+
+        private string? device_code = null;
         private int64? interval = null;
         private int64? expire = null;
         private bool polling = false;
-        public Git.User? user { get; private set; };
         
-        public LoginDialog(Window parent) {
-            transient_for = parent;
-            modal = true;
-
+        public AuthenticationPage() {
             btn_authorize.sensitive = true;
             btn_authorize.label = "Authorize";
             //  Git.get_login_code.begin((src, res) => {
@@ -40,7 +34,7 @@ namespace Gitlink {
             //  });
         }
 
-        public signal void success(Git.User user);
+        public signal void authorized(Git.User user);
 
         [GtkCallback]
         private void copy_code() {
@@ -52,10 +46,11 @@ namespace Gitlink {
 
         [GtkCallback]
         private void authorize() {
-
             var client  = Git.Client.get_default();
-            user = client.load_local_users()[0];
-            nav_view.push_by_tag("user_config");
+            var user = client.load_local_users()[0];
+            authorized(user);
+
+            //  bind_property("display_name", this, "title_display", GLib.BindingFlags.SYNC_CREATE, (src, item, ref to_val) => { to_val = @"Welcome $(item.get_string())"; return true; }, null);
             //  var launcher = new UriLauncher("https://github.com/login/device");
             //  launcher.launch.begin(this, null);
             //  if (!polling) {

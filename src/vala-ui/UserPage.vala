@@ -13,14 +13,14 @@ namespace Gitlink {
         [GtkChild]
         private unowned ListBox dw_repo_list;
 
-        [GtkChild]
-        private unowned ListBox remote_repo_list;
+        //  [GtkChild]
+        //  private unowned ListBox remote_repo_list;
 
         [GtkChild]
         private unowned Adw.PreferencesGroup downloaded;
 
-        [GtkChild]
-        private unowned Adw.PreferencesGroup remote_repos;
+        //  [GtkChild]
+        //  private unowned Adw.PreferencesGroup remote_repos;
 
         //  [GtkChild]
         //  private unowned Button btn_create_new;
@@ -28,8 +28,8 @@ namespace Gitlink {
         [GtkChild]
         private unowned Adw.StatusPage empty_repos;
 
-        [GtkChild]
-        private unowned Adw.StatusPage data_fetch_error;
+        //  [GtkChild]
+        //  private unowned Adw.StatusPage data_fetch_error;
 
         [GtkChild]
         private unowned Adw.Banner logout_banner;
@@ -62,21 +62,23 @@ namespace Gitlink {
             if (local_repos.size > 0) {
                 downloaded.visible = true;
                 dw_repo_list.bind_model(new ReposListModel(local_repos), (item) => item as Widget);
-            }
+            } else empty_repos.visible = true;
 
-            client.load_repositories.begin(user, (src, result) => {
-                var remote_repositories = client.load_repositories.end(result);
-                if (remote_repositories == null) {
-                    data_fetch_error.visible = true;
-                    return;
-                }
+            client.load_repositories.begin(user);
+
+            //  client.load_repositories.begin(user, (src, result) => {
+            //      var remote_repositories = client.load_repositories.end(result);
+            //      if (remote_repositories == null) {
+            //          data_fetch_error.visible = true;
+            //          return;
+            //      }
  
-                //  foreach (var repo in local_repos) remote_repositories.remove(repo);
-                if (remote_repositories.size > 0) {
-                    remote_repos.visible = true;
-                    remote_repo_list.bind_model(new ReposListModel(remote_repositories), (item) => item as Widget);
-                } else empty_repos.visible = true;
-            });
+            //      //  foreach (var repo in local_repos) remote_repositories.remove(repo);
+            //      if (remote_repositories.size > 0) {
+            //          remote_repos.visible = true;
+            //          remote_repo_list.bind_model(new ReposListModel(remote_repositories), (item) => item as Widget);
+            //      } else empty_repos.visible = true;
+            //  });
         }
 
         [GtkCallback]
@@ -90,9 +92,9 @@ namespace Gitlink {
         }
 
         [GtkCallback]
-        public void create_new_repo() {
-            //  var dialog = new RepoCloneDialog(this.user);
-            //  dialog.present();
+        public void clone_repo() {
+            var dialog = new RepoCloneDialog(this.user);
+            dialog.present();
         }
 
         [GtkCallback]

@@ -17,6 +17,7 @@ install_data(
     join_paths(symbolic_dir, ('user-trash-symbolic.svg')),
     join_paths(symbolic_dir, ('application-exit-rtl-symbolic.svg')),
     join_paths(symbolic_dir, ('view-refresh-symbolic.svg')),
+    join_paths(symbolic_dir, ('error-symbolic.svg')),
   ],
   install_dir: get_option('datadir') / 'icons' / symbolic_dir
 )

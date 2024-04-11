@@ -6,15 +6,18 @@ gitlink_sources = [
   'vala-ui/HomePage.vala',
   'vala-ui/DisplayCard.vala',
   'vala-ui/RepoCloneDialog.vala',
-  'vala-ui/LoginDialog.vala',
   'vala-helper/JsonEngine.vala',
   'vala-helper/ListModels.vala',
   'vala-helper/AccountsListModel.vala',
   'vala-helper/ReposListModel.vala',
+  'vala-helper/SSHConfigurations.vala',
   'vala-git/Git.vala',
   'vala-git/GitUser.vala',
   'vala-git/GitClient.vala',
   'vala-git/GitRepo.vala',
+  'vala-ui/login/AuthenticationPage.vala',
+  'vala-ui/login/UserConfigPage.vala',
+  'vala-ui/login/LoginWindow.vala',
 ]
 
 gitlink_deps = [
@@ -33,8 +36,10 @@ blueprints_src = [
     'home_page.blp',
     'display_card.blp',
     'repos_row.blp',
-    'login_dialog.blp',
-    'repo_clone_dialog.blp'
+    'repo_clone_dialog.blp',
+    'authentication_page.blp',
+    'login_window.blp',
+    'user_config_page.blp'
 ]
 
 blueprints_ui = []

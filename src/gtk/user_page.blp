@@ -95,18 +95,18 @@ template $GitlinkUserPage : Adw.NavigationPage {
             title: "Local Repositories";
             visible: false;
 
-            // [header-suffix]
-            // Button {
-            //   Adw.ButtonContent {
-            //     icon-name: "list-add-symbolic";
-            //     label: "Clone New";
-            //   }
+            [header-suffix]
+            Button {
+              Adw.ButtonContent {
+                icon-name: "list-add-symbolic";
+                label: "Clone New";
+              }
 
-            //   styles ["flat"]
-            //   tooltip-text: "Clone any repositories from your github account";
-            //   valign: center;
-            //   clicked => $clone_repo();
-            // }
+              styles ["flat"]
+              tooltip-text: "Clone any repositories from your github account";
+              valign: center;
+              clicked => $clone_repo();
+            }
 
             ListBox dw_repo_list {
               styles["boxed-list"]
@@ -114,55 +114,55 @@ template $GitlinkUserPage : Adw.NavigationPage {
             }
           }
 
-          Adw.PreferencesGroup remote_repos {
-            margin-top: 16;
-            title: "Remote Repositories";
-            visible: false;
+          // Adw.PreferencesGroup remote_repos {
+          //   margin-top: 16;
+          //   title: "Remote Repositories";
+          //   visible: false;
 
-            [header-suffix]
-            Button {
-              Adw.ButtonContent {
-                icon-name: "list-add-symbolic";
-                label: "Create New";
-              }
+          //   [header-suffix]
+          //   Button {
+          //     Adw.ButtonContent {
+          //       icon-name: "list-add-symbolic";
+          //       label: "Create New";
+          //     }
 
-              styles ["flat"]
-              tooltip-text: "Create new repository";
-              valign: center;
-              clicked => $create_new_repo();
-            }
+          //     styles ["flat"]
+          //     tooltip-text: "Create new repository";
+          //     valign: center;
+          //     clicked => $create_new_repo();
+          //   }
 
-            ListBox remote_repo_list {
-              styles["boxed-list"]
-              selection-mode: none;
-            }
-          }
+          //   ListBox remote_repo_list {
+          //     styles["boxed-list"]
+          //     selection-mode: none;
+          //   }
+          // }
 
-          Adw.StatusPage data_fetch_error {
-            height-request: 300;
-            visible: false;
-            title: "Data Fetch Error";
-            description: "Looks like you have poor network connection or you are offline. Please make your connection stable and retry to load account data";
+          // Adw.StatusPage data_fetch_error {
+          //   height-request: 300;
+          //   visible: false;
+          //   title: "Data Fetch Error";
+          //   description: "Looks like you have poor network connection or you are offline. Please make your connection stable and retry to load account data";
           
-            Button {
-              margin-top: 8;
-              halign: center;
+          //   Button {
+          //     margin-top: 8;
+          //     halign: center;
 
-              Adw.ButtonContent {
-                icon-name: "view-refresh-symbolic";
-                label: "Refresh";
-              }
+          //     Adw.ButtonContent {
+          //       icon-name: "view-refresh-symbolic";
+          //       label: "Refresh";
+          //     }
 
-              styles ["pill", "suggested-action"]
-              tooltip-text: "Refresh the data";
-            }
-          }
+          //     styles ["pill", "suggested-action"]
+          //     tooltip-text: "Refresh the data";
+          //   }
+          // }
 
           Adw.StatusPage empty_repos {
             height-request: 250;
             visible: false;
-            title: "Create New Repository";
-            description: "There is no repositories in your account. Add some to get started";
+            title: "Clone Repositories";
+            description: "There is no local repositories for your account. Add some to get started";
           
             Button {
               margin-top: 8;
@@ -170,11 +170,12 @@ template $GitlinkUserPage : Adw.NavigationPage {
 
               Adw.ButtonContent {
                 icon-name: "list-add-symbolic";
-                label: "Get Started";
+                label: "Download";
               }
 
+              clicked => $clone_repo();
               styles ["pill", "suggested-action"]
-              tooltip-text: "Refresh the data";
+              tooltip-text: "Clone repositories from your account";
             }
           }
 

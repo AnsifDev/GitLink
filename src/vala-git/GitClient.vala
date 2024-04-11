@@ -9,8 +9,8 @@ namespace Git {
             return instance;
         }
 
-        private ArrayList<User> user_store = new ArrayList<User>();
-        private ArrayList<Repository> repo_store = new ArrayList<Repository>();
+        private HashMap<int, User> user_store = new HashMap<int, User>();
+        private HashMap<int, Repository> repo_store = new HashMap<int, Repository>();
 
         private ArrayList<Value?> local_users;
         //  public User? active_user { get; set; default = null; }
@@ -50,69 +50,103 @@ namespace Git {
             foreach (var uid_value in local_users) try {
                 var uid = uid_value.get_int64();
 
+                if (!user_store.has_key((int) uid)) continue;
+                var cached_user = user_store[(int) uid];
+
                 //Cache check
-                foreach (var cached_user in user_store) if (cached_user.id == uid) {
-                    var user_data_map = cached_user.to_hashmap();
-                    var user_data_path = @"$(Environment.get_user_data_dir())/$(cached_user.id)";
+                var user_data_map = cached_user.to_hashmap();
+                var user_data_path = @"$(Environment.get_user_data_dir())/$(cached_user.id)";
 
-                    print(@"\t* Saving Data of User: $(cached_user.name)...\n");
-                    json_engine.parse_hashmap_to_file(user_data_map, user_data_path);
+                print(@"\t* Saving Data of User: $(cached_user.name)...\n");
+                json_engine.parse_hashmap_to_file(user_data_map, user_data_path);
 
-                    print(@"\t* Saving Configurations of User: $(cached_user.name)...\n");
-                    cached_user.save_configurations();
+                print(@"\t* Saving Configurations of User: $(cached_user.name)...\n");
+                cached_user.save_configurations();
 
-                    print(@"\t* Saving Local Repository Data of User: $(cached_user.name)...\n");
-                    if (cached_user.local_repos != null) foreach (var rid_value in cached_user.local_repos) {
-                        var rid = rid_value.get_int64();
-        
-                        //Cache check
-                        foreach (var cached_repo in repo_store) if (cached_repo.id == rid) {
-                            var repo_data_map = cached_repo.to_hashmap();
-                            var repo_data_path = @"$(Environment.get_user_data_dir())/$(cached_repo.id)";
+                print(@"\t* Saving Repository Data of User: $(cached_user.name)...\n");
+                foreach (var rid_value in cached_user.remote_repos) {
+                    var rid = rid_value.get_int64();
 
-                            print(@"\t\t* Saving Data of Repository: $(cached_repo.name)...\n");
-                            json_engine.parse_hashmap_to_file(repo_data_map, repo_data_path);
+                    if (!repo_store.has_key((int) rid)) continue;
+                    var cached_repo = repo_store[(int) rid];
+    
+                    var repo_data_map = cached_repo.to_hashmap();
+                    var repo_data_path = @"$(Environment.get_user_data_dir())/$(cached_repo.id)";
 
-                            break;
-                        }
-                    }
-
-                    break;
+                    print(@"\t\t* Saving Data of Repository: $(cached_repo.name)...\n");
+                    json_engine.parse_hashmap_to_file(repo_data_map, repo_data_path);
                 }
             } catch (Error e) { print(@"ERR: $(e.message)\n"); }
 
             print("Shuting down Git Client\t\t[OK]\n");
         }
 
-        public async ArrayList<Repository>? load_repositories(User user) {
-            try {
-                var response = yield request(@"user/repos", user);
-                if (response == null) return null;
+        public async ArrayList<Repository>? load_repositories(User user, bool offline = false) throws Error {
+            var repos = new ArrayList<Repository>();
+            var json_engine = new JsonEngine();
 
-                var json_engine = new JsonEngine();
-                var data_array = json_engine.parse_string_to_array(response);
-                var repos = new ArrayList<Repository>();
-
-                foreach (var data_map_value in data_array) {
-                    var data_map = data_map_value as HashMap<string, Value?>;
-                    var rid = (int64) data_map["id"];
-                    Repository? repo = null;
-                    
-                    foreach (var cached_repo in repo_store) if (cached_repo.id == rid) {
-                        repo = cached_repo;
-                        break;
-                    }
-
-                    if (repo == null) repo_store.add(repo = new Repository(data_map));
-                    else repo.update_from_HashMap(data_map);
-
-                    repos.add(repo);
+            if (offline) foreach (var id_value in user.remote_repos) {
+                var rid = (int64) id_value;
+                var file_path = @"$(Environment.get_user_data_dir())/$rid";
+                
+                if (!repo_store.has_key((int) rid)) {
+                    var repo_data_map = json_engine.parse_file_to_hashmap(file_path);
+                    repo_store[(int) rid] = new Repository(repo_data_map);
                 }
 
-                return repos;
-            } catch (Error e) { printerr(@"ERR: $(e.message)\n"); }
+                repos.add(repo_store[(int) rid]);
+            } else {
+                // Fetching Fresh Data
+                var response_str = yield request(@"user/repos", user);
+                if (response_str == null) return null;
 
-            return null;
+                var repo_data_array = json_engine.parse_string_to_array(response_str);
+                user.remote_repos.clear();
+
+                // Parsing Data
+                foreach (var repo_data_map_value in repo_data_array) {
+                    var repo_data_map = repo_data_map_value as HashMap<string, Value?>;
+                    var rid = (int64) repo_data_map["id"];
+                    user.remote_repos.add(rid);
+
+                    // Cache Check
+                    if (repo_store.has_key((int) rid)) repo_store[(int) rid].update_from_HashMap(repo_data_map);
+                    else repo_store[(int) rid] = new Repository(repo_data_map);
+
+                    //  print(@"Cached $rid, $(repo_store[(int) rid] != null)\n");
+                    repos.add(repo_store[(int) rid]);
+                }
+            }
+            
+
+            //  try {
+            //      var response = yield request(@"user/repos", user);
+            //      if (response == null) return null;
+
+            //      var json_engine = new JsonEngine();
+            //      var data_array = json_engine.parse_string_to_array(response);
+                
+
+            //      foreach (var data_map_value in data_array) {
+            //          var data_map = data_map_value as HashMap<string, Value?>;
+            //          var rid = (int64) data_map["id"];
+            //          Repository? repo = null;
+                    
+            //          foreach (var cached_repo in repo_store) if (cached_repo.id == rid) {
+            //              repo = cached_repo;
+            //              break;
+            //          }
+
+            //          if (repo == null) repo_store.add(repo = new Repository(data_map));
+            //          else repo.update_from_HashMap(data_map);
+
+            //          repos.add(repo);
+            //      }
+
+            //      return repos;
+            //  } catch (Error e) { printerr(@"ERR: $(e.message)\n"); }
+
+            return repos;
         }
 
         public ArrayList<Repository> load_local_repositories(User user) {
@@ -121,55 +155,44 @@ namespace Git {
 
             if (user.local_repos != null) foreach (var rid_value in user.local_repos) {
                 var rid = rid_value.get_int64();
-                Repository? repo = null;
 
                 //Cache check
-                foreach (var cached_repo in repo_store) if (cached_repo.id == rid) {
-                    repo = cached_repo;
-                    break;
-                }
-
-                //User loading
-                if (repo == null) {
+                if (repo_store.has_key((int) rid)) repos.add(repo_store[(int) rid]);
+                else {
+                    //Fallback Fetch
                     var file_path = @"$(Environment.get_user_data_dir())/$rid";
                     if (File.new_for_path(file_path).query_exists()) try {
                         var json_engine = new JsonEngine();
                         var data_map = json_engine.parse_file_to_hashmap(file_path);
                         
-                        repo_store.add(repo = new Repository(data_map));
-                        repo.update.begin();
+                        repo_store[(int) rid] = new Repository(data_map);
+                        repo_store[(int) rid].update.begin();
+                        repos.add(repo_store[(int) rid]);
                     } catch (Error e) { invalid_repos.add(rid_value); }
                     else invalid_repos.add(rid_value);
-                    
                 }
-                
-                repos.add(repo);
             }
 
-            foreach (var rid in invalid_repos) user.local_repos.remove(rid);
+            foreach (var rid in invalid_repos) user.local_repos.remove((int) rid);
 
             return repos;
         }
 
-        public async Repository? load_repository(string full_name, User user) {
+        public async Repository? load_repository(string full_name, User user) throws Error {
             //Cache check
-            foreach (var cached_repo in repo_store) 
-                if (cached_repo.full_name == full_name) return cached_repo;
+            foreach (var rid in repo_store.keys) 
+                if (repo_store[(int) rid].full_name == full_name) return repo_store[(int) rid];
 
-            //Repo loading
-            try {
-                var response = yield request(@"repos/$full_name", user);
-                if (response == null) return null;
+            //Fallback Fetch
+            var response = yield request(@"repos/$full_name", user);
+            if (response == null) return null;
 
-                var json_engine = new JsonEngine();
-                var data_map = json_engine.parse_string_to_hashmap(response);
-                var repo = new Repository(data_map);
-                
-                repo_store.add(repo);
-                return repo;
-            } catch (Error e) { printerr(@"ERR: $(e.message)\n"); }
-
-            return null;
+            var json_engine = new JsonEngine();
+            var data_map = json_engine.parse_string_to_hashmap(response);
+            var repo = new Repository(data_map);
+            
+            repo_store[(int) repo.id] = repo;
+            return repo;
         }
 
         public ArrayList<User> load_local_users() {
@@ -178,53 +201,48 @@ namespace Git {
 
             foreach (var uid_value in local_users) {
                 var uid = uid_value.get_int64();
-                User? user = null;
 
                 //Cache check
-                foreach (var cached_user in user_store) if (cached_user.id == uid) {
-                    user = cached_user;
-                    break;
-                }
-
-                //User loading
-                if (user == null) {
+                if (user_store.has_key((int) uid)) users.add(user_store[(int) uid]);
+                else {
                     var file_path = @"$(Environment.get_user_data_dir())/$uid";
                     if (File.new_for_path(file_path).query_exists()) try {
                         var json_engine = new JsonEngine();
                         var data_map = json_engine.parse_file_to_hashmap(file_path);
                         
-                        user_store.add(user = new User(data_map));
+                        user_store[(int) uid] = new User(data_map);
+                        user_store[(int) uid].update.begin();
+                        users.add(user_store[(int) uid]);
                     } catch (Error e) { invalid_users.add(uid_value); }
                     else invalid_users.add(uid_value);
-                    
                 }
-                
-                users.add(user);
             }
 
-            foreach (var uid in invalid_users) local_users.remove(uid);
+            foreach (var uid in invalid_users) local_users.remove((int) uid);
 
             return users;
         }
 
-        public async User? load_user(string username) {
-            foreach (var cached_user in user_store) 
-                if (cached_user.username == username) return cached_user;
+        public async User? load_user(string username) throws Error {
+            // Cache Check
+            foreach (var uid in user_store.keys) 
+                if (user_store[(int) uid].username == username) return user_store[(int) uid];
 
-            //User loading
-            try {
-                var response = yield request(@"users/$username", null);
-                if (response == null) return null;
+            //Fallback Fetch
+            var response = yield request(@"users/$username", null);
+            if (response == null) return null;
 
-                var json_engine = new JsonEngine();
-                var data_map = json_engine.parse_string_to_hashmap(response);
-                var user = new User(data_map); 
-                
-                user_store.add(user);
-                return user;
-            } catch (Error e) { printerr(@"ERR: $(e.message)\n"); }
+            var json_engine = new JsonEngine();
+            var data_map = json_engine.parse_string_to_hashmap(response);
+            var user = new User(data_map); 
+            
+            user_store[(int) user.id] = user;
+            return user;
+        }
 
-            return null;
+        public void set_as_local_user(User user) {
+            foreach (var element in local_users) if (element.get_int64() == user.id) return;
+            local_users.add(user.id);
         }
 
         public async User authenticate (string device_code, int expire, int interval) throws Error {
@@ -272,16 +290,14 @@ namespace Git {
             var response = (string) response_bytes.get_data();
 
             var user_map = new JsonEngine().parse_string_to_hashmap(response);
+            var uid = (int) user_map["id"].get_int64();
 
             print("\t* Registering User Account\n");
-            var user = new User(user_map);
-            user.token = token;
-
-            user_store.add(user);
-            local_users.add(user.id);
+            if (!user_store.has_key(uid)) user_store[uid] = new User(user_map);
+            user_store[uid].token = token;
 
             print(@"Processing Request authenticate\t\t[OK]\n");
-            return user;
+            return user_store[uid];
         }
     }
 }

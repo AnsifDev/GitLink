@@ -4,3 +4,4 @@ _build
 .vscode
 src.old
 test.http
+*.old

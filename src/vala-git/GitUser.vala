@@ -13,6 +13,7 @@ namespace Git {
         public int64 following { get; private set; }
         public ArrayList<Value?> local_repos { get; private set; }
         public ArrayList<Value?> remote_repos { get; private set; }
+        public ArrayList<Value?>? remote_ssh_keys { get; set; }
         
         internal User(HashMap<string, Value?> data_map) {
             id = (int64) data_map["id"];

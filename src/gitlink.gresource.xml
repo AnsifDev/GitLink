@@ -11,6 +11,7 @@
     <file>gtk/authentication_page.ui</file>
     <file>gtk/login_window.ui</file>
     <file>gtk/user_config_page.ui</file>
+    <file>gtk/ssh_config_page.ui</file>
     <file preprocess="xml-stripblanks">gtk/help-overlay.ui</file>
   </gresource>
 </gresources>

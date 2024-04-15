@@ -17,6 +17,7 @@ gitlink_sources = [
   'vala-git/GitRepo.vala',
   'vala-ui/login/AuthenticationPage.vala',
   'vala-ui/login/UserConfigPage.vala',
+  'vala-ui/login/SSHConfigPage.vala',
   'vala-ui/login/LoginWindow.vala',
 ]
 
@@ -39,7 +40,8 @@ blueprints_src = [
     'repo_clone_dialog.blp',
     'authentication_page.blp',
     'login_window.blp',
-    'user_config_page.blp'
+    'user_config_page.blp',
+    'ssh_config_page.blp'
 ]
 
 blueprints_ui = []

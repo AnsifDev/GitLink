@@ -2,13 +2,13 @@ using Gtk 4.0;
 using Adw 1;
 
 template $GitlinkSSHConfigPage : Adw.NavigationPage {
-  title: "SSH Config";
+  title: "Choose SSH Key";
   tag: "ssh_config";
 
   Adw.ToolbarView {
     [top]
     Adw.HeaderBar {
-      show-title: false;
+      // show-title: false;
 
       // [end]
       // Gtk.Button {
@@ -30,14 +30,16 @@ template $GitlinkSSHConfigPage : Adw.NavigationPage {
         spacing: 16;
 
         Gtk.Image {
-          icon-name: "key-symbolic";
+          icon-name: "fingerprint-symbolic";
           pixel-size: 80;
           margin-top: 32;
           margin-bottom: 32;
         }
 
         Gtk.Label {
-          label: "Choose An Existing SSH Key";
+          label: "Local SSH Keys";
+          xalign: 0;
+          hexpand: true;
           styles ["title-2"]
         }
 
@@ -68,8 +70,9 @@ template $GitlinkSSHConfigPage : Adw.NavigationPage {
       }
 
       Button {
-        sensitive: false;
+        // sensitive: false;
         label: "Confirm";
+        clicked => $confirm();
         styles ["pill", "suggested-action"]
       }
     }

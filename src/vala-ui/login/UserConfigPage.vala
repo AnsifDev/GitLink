@@ -18,7 +18,7 @@ namespace Gitlink {
         public bool user_email_ok { get; internal set; default = true; }
         public bool ssh_key_ok { get; internal set; default = false; }
         public bool ssh_key_warning { get; internal set; default = false; }
-        public bool ssh_key_loading { get; internal set; default = false; }
+        public bool ssh_key_loading { get; internal set; default = true; }
 
         private Git.User user;
         private Gtk.Window window;
@@ -37,28 +37,28 @@ namespace Gitlink {
                 ssh_key_ok = true;
             }
 
-            //  Git.request.begin("user/keys", user, (src, res) => {
-            //      var response_str = Git.request.end(res);
-            //      user.remote_ssh_keys = new JsonEngine().parse_string_to_array(response_str);
+            Git.request.begin("user/keys", user, (src, res) => {
+                var response_str = Git.request.end(res);
+                user.remote_ssh_keys = new JsonEngine().parse_string_to_array(response_str);
 
-            //      if (ssh_key_ok) {
-            //          if (ssh_key[0] == '~') ssh_key = ssh_key.replace("~", Environment.get_home_dir());
-            //          var file_reader = new DataInputStream(File.new_for_path(@"$ssh_key.pub").read());
-            //          var key = file_reader.read_line();
-            //          ssh_key_warning = true;
+                if (ssh_key_ok) {
+                    if (ssh_key[0] == '~') ssh_key = ssh_key.replace("~", Environment.get_home_dir());
+                    var file_reader = new DataInputStream(File.new_for_path(@"$ssh_key.pub").read());
+                    var key = file_reader.read_line();
+                    ssh_key_warning = true;
 
-            //          foreach (var item in user.remote_ssh_keys) {
-            //              var data_map = (HashMap<string, Value?>) item;
-            //              var remote_key = data_map["key"].get_string();
-            //              //  print("%s: %s\n", key, remote_key);
+                    foreach (var item in user.remote_ssh_keys) {
+                        var data_map = (HashMap<string, Value?>) item;
+                        var remote_key = data_map["key"].get_string();
+                        //  print("%s: %s\n", key, remote_key);
 
                         
-            //              if (!(ssh_key_warning = !key.has_prefix(remote_key))) break;
-            //          }
-            //      }
+                        if (!(ssh_key_warning = !key.has_prefix(remote_key))) break;
+                    }
+                }
                 
-            //      ssh_key_loading = false;
-            //  });
+                ssh_key_loading = false;
+            });
         }
 
         public signal void confirmed();

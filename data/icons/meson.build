@@ -20,6 +20,8 @@ install_data(
     join_paths(symbolic_dir, ('error-symbolic.svg')),
     join_paths(symbolic_dir, ('warning-symbolic.svg')),
     join_paths(symbolic_dir, ('key-symbolic.svg')),
+    join_paths(symbolic_dir, ('fingerprint-symbolic.svg')),
+    join_paths(symbolic_dir, ('check-round-outline-symbolic.svg')),
   ],
   install_dir: get_option('datadir') / 'icons' / symbolic_dir
 )

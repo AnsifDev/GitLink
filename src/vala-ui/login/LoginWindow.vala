@@ -18,6 +18,7 @@ namespace Gitlink {
                 var user_config_page = new UserConfigPage (user, this);
                 user_config_page.confirmed.connect (() => authenticated (user));
                 user_config_page.push.connect (nav_view.push );
+                user_config_page.pop.connect(nav_view.pop);
                 nav_view.push(user_config_page);
             });
             nav_view.push(auth_page);

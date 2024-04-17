@@ -22,6 +22,7 @@ namespace Gitlink {
 
         private Git.User user;
         private Gtk.Window window;
+        private SSHConfiguration ssh_config;
         
         public UserConfigPage(Git.User user, Gtk.Window window) {
             this.user = user;
@@ -31,39 +32,50 @@ namespace Gitlink {
             user.bind_property("name", this, "display_name", GLib.BindingFlags.SYNC_CREATE|GLib.BindingFlags.BIDIRECTIONAL, null, null);
             user.bind_property("email", this, "email", GLib.BindingFlags.SYNC_CREATE|GLib.BindingFlags.BIDIRECTIONAL, null, null);
 
-            var ssh = SSHConfiguration.load();
-            if (ssh.has_key(@"$username.github.com")) {
-                ssh_key = ssh[@"$username.github.com"]["IdentityFile"];
+            ssh_config = SSHConfiguration.load();
+        }
+
+        public override void shown() {
+            if (ssh_config.has_key(@"$username.github.com")) {
+                ssh_key = ssh_config[@"$username.github.com"]["IdentityFile"];
                 ssh_key_ok = true;
             }
 
-            Git.request.begin("user/keys", user, (src, res) => {
+            if (user.remote_ssh_keys != null) {
+                ssh_key_loading = false;
+                validate_keys();
+            } else Git.request.begin("user/keys", user, (src, res) => {
                 var response_str = Git.request.end(res);
                 user.remote_ssh_keys = new JsonEngine().parse_string_to_array(response_str);
 
-                if (ssh_key_ok) {
-                    if (ssh_key[0] == '~') ssh_key = ssh_key.replace("~", Environment.get_home_dir());
-                    var file_reader = new DataInputStream(File.new_for_path(@"$ssh_key.pub").read());
-                    var key = file_reader.read_line();
-                    ssh_key_warning = true;
-
-                    foreach (var item in user.remote_ssh_keys) {
-                        var data_map = (HashMap<string, Value?>) item;
-                        var remote_key = data_map["key"].get_string();
-                        //  print("%s: %s\n", key, remote_key);
-
-                        
-                        if (!(ssh_key_warning = !key.has_prefix(remote_key))) break;
-                    }
-                }
-                
+                validate_keys();
                 ssh_key_loading = false;
             });
+        }
+
+        private void validate_keys() {
+            if (ssh_key_ok) {
+                if (ssh_key[0] == '~') ssh_key = ssh_key.replace("~", Environment.get_home_dir());
+                var file_reader = new DataInputStream(File.new_for_path(@"$ssh_key.pub").read());
+                var key = file_reader.read_line();
+                ssh_key_warning = true;
+
+                foreach (var item in user.remote_ssh_keys) {
+                    var data_map = (HashMap<string, Value?>) item;
+                    var remote_key = data_map["key"].get_string();
+                    //  print("%s: %s\n", key, remote_key);
+
+                    
+                    if (!(ssh_key_warning = !key.has_prefix(remote_key))) break;
+                }
+            }
         }
 
         public signal void confirmed();
 
         public signal void push(Adw.NavigationPage page);
+
+        public signal bool pop();
 
         [GtkCallback]
         private void show_error(Gtk.Widget src) {
@@ -74,7 +86,9 @@ namespace Gitlink {
         
         [GtkCallback]
         private void config_ssh(Gtk.Widget src) {
-            var ssh_config_page = new SSHConfigPage(user);
+            var ssh_config_page = new SSHConfigPage(user, ssh_config);
+            ssh_config_page.push.connect((page) => push(page));
+            ssh_config_page.pop.connect(() => pop());
             push(ssh_config_page);
         }
     }

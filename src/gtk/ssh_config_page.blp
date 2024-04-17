@@ -45,37 +45,26 @@ template $GitlinkSSHConfigPage : Adw.NavigationPage {
 
         ListBox key_list_view {
           styles ["boxed-list"]
-          selection-mode: single;
+          selection-mode: none;
+          activate-on-single-click: true;
         }
       }
         
     };
 
     [bottom]
-    Box {
-      orientation: horizontal;
-      margin-start: 16;
-      margin-end: 16;
-      margin-bottom: 8;
+    Button {
+      // sensitive: false;
+      hexpand: true;
+      halign: center;
       margin-top: 8;
-      spacing: 8;
-      halign: fill;
+      margin-bottom: 8;
+      styles ["pill", "suggested-action"]
 
-      Button {
-        // sensitive: false;
-        hexpand: true;
-        halign: start;
-        label: "Create New";
-        styles ["pill"]
-      }
-
-      Button {
-        // sensitive: false;
-        label: "Confirm";
-        clicked => $confirm();
-        styles ["pill", "suggested-action"]
+      Adw.ButtonContent {
+        label: "Create New SSH Key";
+        icon-name: "list-add-symbolic";
       }
     }
-    
   }
 }

@@ -52,6 +52,12 @@ namespace Gitlink {
 
         public HostConfiguration(string host) { this.host = host; }
 
+        public HostConfiguration.for_github(string host, string? identity_file = null) {
+            this(host);
+            this["Host"] = "github.com";
+            if (identity_file != null) this["IdentityFile"] = identity_file;
+        }
+
         public string to_string() {
             var lines = new ArrayList<string>();
 

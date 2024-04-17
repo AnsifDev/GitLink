@@ -13,6 +13,7 @@ namespace Gitlink {
             tick.add_css_class ("success");
             bind_property ("configured", tick, "visible", GLib.BindingFlags.SYNC_CREATE, null, null);
             add_suffix (tick);
+            activatable = true;
         }
 
         public void bind(LocalKey key) {
@@ -75,9 +76,9 @@ namespace Gitlink {
                     var filename = info.get_name ();
                     if (filename.has_suffix (".pub")) {
                         var local_key = new LocalKey ();
-                        local_key.local_path = @"$path/$filename";
+                        local_key.local_path = @"$path/$filename"[:-4];
 
-                        var file_reader = new DataInputStream(File.new_for_path(@"$(local_key.local_path)").read());
+                        var file_reader = new DataInputStream(File.new_for_path(@"$(local_key.local_path).pub").read());
                         var key = file_reader.read_line();
 
                         foreach (var item in user.remote_ssh_keys) {
@@ -96,10 +97,11 @@ namespace Gitlink {
             key_list_model = new KeyListModel(keys);
             key_list_view.bind_model (key_list_model, (widget) => (Gtk.Widget) widget);
             key_list_view.row_activated.connect((row) => {
+                //  stdout.printf ("Fired\n");
                 var key_list_row = (KeyListRow) row;
                 var local_path = key_list_row.key.local_path;
 
-                if (ssh_config.has_key(@"$(user.username).github.com")) 
+                if (!ssh_config.has_key(@"$(user.username).github.com")) 
                     ssh_config[@"$(user.username).github.com"] = new HostConfiguration.for_github(@"$(user.username).github.com");
                 ssh_config[@"$(user.username).github.com"]["IdentityFile"] = local_path;
 

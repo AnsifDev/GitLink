@@ -19,6 +19,7 @@ gitlink_sources = [
   'vala-ui/login/UserConfigPage.vala',
   'vala-ui/login/SSHConfigPage.vala',
   'vala-ui/login/LoginWindow.vala',
+  'vala-ui/login/SSHCreatePage.vala',
 ]
 
 gitlink_deps = [
@@ -29,6 +30,7 @@ gitlink_deps = [
   dependency('libsoup-3.0'),
   dependency('libportal-gtk4'),
   dependency('libadwaita-1', version: '>= 1.2'),
+  dependency('posix'),
 ]
 
 blueprints_src = [
@@ -41,7 +43,8 @@ blueprints_src = [
     'authentication_page.blp',
     'login_window.blp',
     'user_config_page.blp',
-    'ssh_config_page.blp'
+    'ssh_config_page.blp',
+    'ssh_create_page.blp'
 ]
 
 blueprints_ui = []

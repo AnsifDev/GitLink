@@ -24,6 +24,7 @@ install_data(
     join_paths(symbolic_dir, ('check-round-outline-symbolic.svg')),
     join_paths(symbolic_dir, ('arrow2-right-symbolic.svg')),
     join_paths(symbolic_dir, ('document-edit-symbolic.svg')),
+    join_paths(symbolic_dir, ('key4-symbolic.svg')),
   ],
   install_dir: get_option('datadir') / 'icons' / symbolic_dir
 )

@@ -1,7 +1,7 @@
 using Gtk 4.0;
 using Adw 1;
 
-template $GitlinkSSHConfigPage : Adw.NavigationPage {
+template $GitlinkSSHCreatePage : Adw.NavigationPage {
   title: "Create New SSH Key";
   tag: "ssh_create";
 
@@ -46,12 +46,13 @@ template $GitlinkSSHConfigPage : Adw.NavigationPage {
         Adw.PreferencesGroup {
           Adw.PasswordEntryRow {
             title: "Password";
-            text: bind template.password;
+            text: bind template.password bidirectional;
+            changed => $on_text_changed();
 
             [suffix]
             Gtk.Button {
               valign: center;
-              visible: bind template.ssh_pass_ok inverted;
+              visible: bind template.password_ok inverted;
               icon-name: "error-symbolic";
               tooltip-text: "Must contain atleast 8 character";
               styles ["error", "flat"]
@@ -61,12 +62,13 @@ template $GitlinkSSHConfigPage : Adw.NavigationPage {
           
           Adw.EntryRow {
             title: "Confirm Password";
-            text: bind template.password;
+            text: bind template.password_confirm bidirectional;
+            changed => $on_text_changed();
 
             [suffix]
             Gtk.Button {
               valign: center;
-              visible: bind template.ssh_pass_ok inverted;
+              visible: bind template.password_confirm_ok inverted;
               icon-name: "error-symbolic";
               tooltip-text: "Password Missmatch";
               styles ["error", "flat"]
@@ -80,16 +82,30 @@ template $GitlinkSSHConfigPage : Adw.NavigationPage {
 
     [bottom]
     Button {
-      // sensitive: false;
-      hexpand: true;
-      halign: center;
       margin-top: 8;
       margin-bottom: 8;
+      margin-start: 16;
+      margin-end: 16;
+
+      hexpand: true;
+      halign: end;
+
+      sensitive: bind template.creatable;
+      clicked => $create_new();
       styles ["pill", "suggested-action"]
 
-      Adw.ButtonContent {
-        label: "Create New SSH Key";
-        icon-name: "list-add-symbolic";
+      Box {
+        orientation: horizontal;
+        spacing: 8;
+
+        Gtk.Spinner {
+          spinning: true;
+          visible: bind template.creating;
+        }
+        
+        Gtk.Label {
+          label: "Create";
+        }
       }
     }
   }

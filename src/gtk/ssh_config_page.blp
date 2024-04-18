@@ -60,6 +60,7 @@ template $GitlinkSSHConfigPage : Adw.NavigationPage {
       margin-top: 8;
       margin-bottom: 8;
       styles ["pill", "suggested-action"]
+      clicked => $create_new();
 
       Adw.ButtonContent {
         label: "Create New SSH Key";

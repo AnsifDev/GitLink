@@ -29,8 +29,8 @@ gitlink_deps = [
   dependency('json-glib-1.0'),
   dependency('libsoup-3.0'),
   dependency('libportal-gtk4'),
-  dependency('libadwaita-1', version: '>= 1.2'),
-  dependency('posix'),
+  meson.get_compiler('vala').find_library('posix'),
+  dependency('libadwaita-1', version: '>= 1.2')
 ]
 
 blueprints_src = [
@@ -44,7 +44,7 @@ blueprints_src = [
     'login_window.blp',
     'user_config_page.blp',
     'ssh_config_page.blp',
-    'ssh_create_page.blp'
+    'ssh_create_page.blp',
 ]
 
 blueprints_ui = []

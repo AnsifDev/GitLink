@@ -11,15 +11,19 @@ namespace Gitlink {
         private unowned Adw.ToastOverlay toast_overlay;
 
         public string? user_code { get; private set; default = "OCSD-12DE"; }
+        public bool polling { get; set; default = false; }
+        public string auth_label { get; set; default = ""; }
 
         private string? device_code = null;
         private int64? interval = null;
         private int64? expire = null;
-        private bool polling = false;
+        private LoginWindow parent_window;
         
-        public AuthenticationPage() {
+        public AuthenticationPage(LoginWindow parent_window) {
+            this.parent_window = parent_window;
             btn_authorize.sensitive = true;
-            btn_authorize.label = "Authorize";
+            auth_label = "Authorize";
+            
             //  Git.get_login_code.begin((src, res) => {
             //      try {
             //          var response_map = Git.get_login_code.end(res);
@@ -29,12 +33,10 @@ namespace Gitlink {
             //          expire = (int64) response_map["expires_in"];
 
             //          btn_authorize.sensitive = true;
-            //          btn_authorize.label = "Authorize";
+            //          auth_label = "Authorize";
             //      } catch (Error e) { print(e.message); }
             //  });
         }
-
-        public signal void authorized(Git.User user);
 
         [GtkCallback]
         private void copy_code() {
@@ -44,32 +46,36 @@ namespace Gitlink {
             toast_overlay.add_toast(toast);
         }
 
+        private async Git.User authenticate() throws Error {
+            var client = Git.Client.get_default();
+
+            //  var user = yield client.authenticate(device_code, (int) expire, (int) interval);
+            var user = client.load_local_users()[0];
+            
+            var resp = yield Git.request("user/keys", user);
+            user.remote_ssh_keys = new JsonEngine().parse_string_to_array(resp);
+            return user;
+        }
+
         [GtkCallback]
         private void authorize() {
-            var client  = Git.Client.get_default();
-            var user = client.load_local_users()[0];
-            authorized(user);
-
-            //  bind_property("display_name", this, "title_display", GLib.BindingFlags.SYNC_CREATE, (src, item, ref to_val) => { to_val = @"Welcome $(item.get_string())"; return true; }, null);
             //  var launcher = new UriLauncher("https://github.com/login/device");
             //  launcher.launch.begin(this, null);
             //  if (!polling) {
-            //      polling = true;
-            //      var client = Git.Client.get_default();
-            //      client.authenticate.begin(device_code, (int) expire, (int) interval, (src, res) => {
-            //          try {
-            //              user = client.authenticate.end(res);
+                polling = true;
+                authenticate.begin((src, res) => {
+                    try {
+                        var user = authenticate.end(res);
 
-            //              // nav_view.push_by_tag("user_config");
-            //              success(user);
-            //          } catch (Error e) {
-            //              var msg = new Adw.MessageDialog(transient_for, "Something Wrong", "Login Failed due some unexpected error");
-            //              msg.add_response("ok", "OK");
-            //              msg.present();
-            //          }
+                        parent_window.push(new UserConfigPage(parent_window, user));
+                    } catch (Error e) {
+                        var msg = new Adw.MessageDialog(parent_window, "Something Wrong", "Login Failed due some unexpected error");
+                        msg.add_response("ok", "OK");
+                        msg.present();
+                    }
 
             //          close();
-            //      });
+                });
             //  }
         }
     }

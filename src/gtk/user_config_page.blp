@@ -47,6 +47,7 @@ template $GitlinkUserConfigPage : Adw.NavigationPage {
           Adw.EntryRow {
             title: "Display Name";
             text: bind template.display_name bidirectional;
+            changed => $on_text_changed();
             
             [suffix]
             Gtk.Button {
@@ -62,6 +63,7 @@ template $GitlinkUserConfigPage : Adw.NavigationPage {
           Adw.EntryRow {
             title: "Email";
             text: bind template.email bidirectional;
+            changed => $on_text_changed();
             
             [suffix]
             Gtk.Button {
@@ -170,27 +172,18 @@ template $GitlinkUserConfigPage : Adw.NavigationPage {
     };
 
     [bottom]
-    Box {
-      orientation: horizontal;
+    Button {
       margin-start: 16;
       margin-end: 16;
       margin-bottom: 8;
       margin-top: 8;
+      clicked => $confirm();
+
+      sensitive: bind template.confirmable;
+      label: "Confirm";
       halign: end;
-
-      // Gtk.CheckButton {
-      //   label: "Create New SSH Key";
-      //   active: true;
-      //   sensitive: false;
-      //   hexpand: true;
-      // }
-
-      Button {
-        sensitive: false;
-        label: "Next";
-        styles ["pill", "suggested-action"]
-      }
+      hexpand: true;
+      styles ["pill", "suggested-action"]
     }
-    
   }
 }

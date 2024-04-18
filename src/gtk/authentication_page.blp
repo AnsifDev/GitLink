@@ -86,23 +86,51 @@ template $GitlinkAuthenticationPage: Adw.NavigationPage {
         }
       };
 
+    //   [bottom]
+    //   Box {
+    //     orientation: horizontal;
+    //     margin-start: 16;
+    //     margin-end: 16;
+    //     margin-top: 8;
+    //     margin-bottom: 8;
+    //     halign: end;
+
+    //     Button btn_authorize {
+    //       sensitive: false;
+    //       label: "Setting Up";
+    //       styles ["pill", "suggested-action"]
+    //       clicked => $authorize();
+    //     }
+    //   }
+      
       [bottom]
-      Box {
-        orientation: horizontal;
+      Button btn_authorize {
         margin-start: 16;
         margin-end: 16;
         margin-top: 8;
         margin-bottom: 8;
         halign: end;
 
-        Button btn_authorize {
-          sensitive: false;
-          label: "Setting Up";
-          styles ["pill", "suggested-action"]
-          clicked => $authorize();
+        sensitive: false;
+        clicked => $authorize();
+        styles ["pill", "suggested-action"]
+
+        Box {
+          orientation: horizontal;
+          spacing: 8;
+
+          Gtk.Spinner {
+            spinning: true;
+            visible: bind template.polling;
+          }
+          
+          Gtk.Label {
+            label: bind template.auth_label;
+          }
         }
       }
-      
     }
+
+    
   }
 }

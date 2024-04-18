@@ -8,20 +8,22 @@ namespace Gitlink {
         private unowned Adw.NavigationView nav_view;
 
         public signal void authenticated(Git.User user);
+
+        public void push(Adw.NavigationPage page) { nav_view.push(page); }
+
+        public bool pop() { return nav_view.pop(); }
+
+        public void show_error(string description) {
+            var msg = new Adw.MessageDialog(this, "Error", description);
+            msg.add_response("ok", "OK");
+            msg.present();
+        }
         
         public LoginWindow(Window parent) {
             transient_for = parent;
             modal = true;
 
-            var auth_page = new AuthenticationPage();
-            auth_page.authorized.connect ((user) => {
-                var user_config_page = new UserConfigPage (user, this);
-                user_config_page.confirmed.connect (() => authenticated (user));
-                user_config_page.push.connect (nav_view.push );
-                user_config_page.pop.connect(nav_view.pop);
-                nav_view.push(user_config_page);
-            });
-            nav_view.push(auth_page);
+            push(new AuthenticationPage(this));
         }
     }
 }

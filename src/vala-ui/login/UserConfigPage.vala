@@ -4,29 +4,24 @@ using Gee;
 namespace Gitlink {
     [GtkTemplate (ui = "/com/asiet/lab/GitLink/gtk/user_config_page.ui")]
     public class UserConfigPage : Adw.NavigationPage {
-        public string? user_code { get; private set; default = "OCSD-12DE"; }
         public string username { get; internal set; default = ""; }
         public string display_name { get; internal set; default = ""; }
         public string email { get; internal set; default = ""; }
         public string ssh_key { get; internal set; default = "Not Selected"; }
-        //  public string ssh_name { get; internal set; default = ""; }
-        //  public string ssh_pass { get; internal set; default = ""; }
-        //  public bool ssh_name_ok { get; internal set; default = false; }
-        //  public bool ssh_pass_ok { get; internal set; default = false; }
-        //  public bool ssh_pass_confirm { get; internal set; default = false; }
         public bool user_name_ok { get; internal set; default = true; }
         public bool user_email_ok { get; internal set; default = true; }
         public bool ssh_key_ok { get; internal set; default = false; }
         public bool ssh_key_warning { get; internal set; default = false; }
         public bool ssh_key_loading { get; internal set; default = true; }
+        public bool confirmable { get; internal set; default = false; }
 
         private Git.User user;
-        private Gtk.Window window;
         private SSHConfiguration ssh_config;
+        private LoginWindow parent_window;
         
-        public UserConfigPage(Git.User user, Gtk.Window window) {
+        public UserConfigPage(LoginWindow parent_window, Git.User user) {
             this.user = user;
-            this.window = window;
+            this.parent_window = parent_window;
             
             user.bind_property("username", this, "username", GLib.BindingFlags.SYNC_CREATE, null, null);
             user.bind_property("name", this, "display_name", GLib.BindingFlags.SYNC_CREATE|GLib.BindingFlags.BIDIRECTIONAL, null, null);
@@ -54,6 +49,8 @@ namespace Gitlink {
         }
 
         private void validate_keys() {
+            confirmable = user_name_ok && user_name_ok && ssh_key_ok;
+
             if (ssh_key_ok) {
                 if (ssh_key[0] == '~') ssh_key = ssh_key.replace("~", Environment.get_home_dir());
                 var file_reader = new DataInputStream(File.new_for_path(@"$ssh_key.pub").read());
@@ -70,26 +67,26 @@ namespace Gitlink {
                 }
             }
         }
-
-        public signal void confirmed();
-
-        public signal void push(Adw.NavigationPage page);
-
-        public signal bool pop();
+        
+        [GtkCallback]
+        private void show_error(Gtk.Widget src) { parent_window.show_error(src.tooltip_text); }
 
         [GtkCallback]
-        private void show_error(Gtk.Widget src) {
-            var msg = new Adw.MessageDialog(window, "Error", src.tooltip_text);
-            msg.add_response("ok", "OK");
-            msg.present();
+        private void on_text_changed() {
+            user_name_ok = display_name.length > 1;
+            user_email_ok = "@" in email && !email.has_suffix("@") && !email.has_prefix("@");
+            confirmable = user_name_ok && user_email_ok && ssh_key_ok && !ssh_key_loading;
         }
         
         [GtkCallback]
         private void config_ssh(Gtk.Widget src) {
-            var ssh_config_page = new SSHConfigPage(user, ssh_config);
-            ssh_config_page.push.connect((page) => push(page));
-            ssh_config_page.pop.connect(() => pop());
-            push(ssh_config_page);
+            parent_window.push(new SSHConfigPage(parent_window, user, ssh_config));
+        }
+        
+        [GtkCallback]
+        private void confirm(Gtk.Widget src) {
+            parent_window.authenticated(user);
+            parent_window.close();
         }
     }
 }

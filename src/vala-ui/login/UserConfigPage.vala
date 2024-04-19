@@ -49,7 +49,7 @@ namespace Gitlink {
         }
 
         private void validate_keys() {
-            confirmable = user_name_ok && user_name_ok && ssh_key_ok;
+            confirmable = user_name_ok && user_email_ok && ssh_key_ok && !ssh_key_warning;
 
             if (ssh_key_ok) {
                 if (ssh_key[0] == '~') ssh_key = ssh_key.replace("~", Environment.get_home_dir());
@@ -75,7 +75,7 @@ namespace Gitlink {
         private void on_text_changed() {
             user_name_ok = display_name.length > 1;
             user_email_ok = "@" in email && !email.has_suffix("@") && !email.has_prefix("@");
-            confirmable = user_name_ok && user_email_ok && ssh_key_ok && !ssh_key_loading;
+            confirmable = user_name_ok && user_email_ok && ssh_key_ok && !ssh_key_warning && !ssh_key_loading;
         }
         
         [GtkCallback]

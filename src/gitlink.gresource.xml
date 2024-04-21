@@ -13,6 +13,15 @@
     <file>gtk/user_config_page.ui</file>
     <file>gtk/ssh_config_page.ui</file>
     <file>gtk/ssh_create_page.ui</file>
+    <file>gtk/welcome_page.ui</file>
+    <file>gtk/empty_account_page.ui</file>
+    <file>gtk/setup_page.ui</file>
+    <file>gtk/invigilator_page.ui</file>
+    <file>assets/config.png</file>
+    <file>assets/lab_client.png</file>
+    <file>assets/lab_host.png</file>
+    <file>assets/personal.png</file>
+    <file>assets/repo.png</file>
     <file preprocess="xml-stripblanks">gtk/help-overlay.ui</file>
   </gresource>
 </gresources>

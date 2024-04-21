@@ -42,6 +42,7 @@ namespace Gitlink {
             base.activate ();
             var win = this.active_window;
             if (win == null) win = new Gitlink.Window (this);
+            //  if (win == null) win = new Gitlink.ConfigWindow (this);
             win.present ();
         }
 

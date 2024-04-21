@@ -11,6 +11,7 @@ gitlink_sources = [
   'vala-helper/AccountsListModel.vala',
   'vala-helper/ReposListModel.vala',
   'vala-helper/SSHConfigurations.vala',
+  'vala-helper/Connection.vala',
   'vala-git/Git.vala',
   'vala-git/GitUser.vala',
   'vala-git/GitClient.vala',
@@ -20,6 +21,10 @@ gitlink_sources = [
   'vala-ui/login/SSHConfigPage.vala',
   'vala-ui/login/LoginWindow.vala',
   'vala-ui/login/SSHCreatePage.vala',
+  'vala-ui/WelcomePage.vala',
+  'vala-ui/EmptyAccountPage.vala',
+  'vala-ui/SetupPage.vala',
+  'vala-ui/InvigilatorPage.vala'
 ]
 
 gitlink_deps = [
@@ -30,7 +35,8 @@ gitlink_deps = [
   dependency('libsoup-3.0'),
   dependency('libportal-gtk4'),
   meson.get_compiler('vala').find_library('posix'),
-  dependency('libadwaita-1', version: '>= 1.2')
+  meson.get_compiler('vala').find_library('linux'),
+  dependency('libadwaita-1', version: '>= 1.2'),
 ]
 
 blueprints_src = [
@@ -45,6 +51,9 @@ blueprints_src = [
     'user_config_page.blp',
     'ssh_config_page.blp',
     'ssh_create_page.blp',
+    'welcome_page.blp',
+    'empty_account_page.blp',
+    'setup_page.blp',
 ]
 
 blueprints_ui = []

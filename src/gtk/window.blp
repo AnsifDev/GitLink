@@ -8,41 +8,6 @@ template $GitlinkWindow: Adw.ApplicationWindow {
   height-request: 534;
 
   content: Adw.NavigationView nav_view {
-    Adw.NavigationPage {
-      title: "Accounts";
-      tag: "empty_acc";
-
-      Adw.ToolbarView {
-        [top]
-        Adw.HeaderBar {
-          show-title: false;
-        }
-
-        content: Adw.Clamp {
-          vexpand: true;
-          valign: center;
-          margin-bottom: 64;
-          maximum-size: 800;
-          tightening-threshold: 300;
-          Box {
-            orientation: vertical;
-            spacing: 8;
-
-            Adw.StatusPage {
-              icon-name: "avatar-default-symbolic";
-              title: "No Accounts";
-              description: "Login to your account to get started";
-            }
-
-            Button {
-              styles ["pill", "suggested-action"]
-              label: "Add New Account";
-              halign: center;
-              clicked => $login();
-            }
-          }
-        };
-      }
-    }
+    
   };
 }

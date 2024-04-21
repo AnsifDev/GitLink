@@ -4,12 +4,11 @@ using Adw 1;
 template $GitlinkHomePage: Adw.NavigationPage {
   title: "Accounts";
   tag: "home";
+  can-pop: false;
 
   Adw.ToolbarView {
       [top]
       Adw.HeaderBar {
-        show-back-button: false;
-
         [end]
         Button {
           icon-name: "list-add-symbolic";

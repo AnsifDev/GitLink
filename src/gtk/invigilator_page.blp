@@ -1,0 +1,30 @@
+using Gtk 4.0;
+using Adw 1;
+
+template $GitlinkInvigilatorPage : Adw.NavigationPage {
+  title: "GitLink - Invigilator";
+  tag: "invigilator";
+
+  Adw.ToolbarView {
+    [top]
+    Adw.HeaderBar {
+
+    }
+
+    content: Adw.Clamp {
+        margin-bottom: 24;
+        margin-top: 24;
+        margin-start: 32;
+        margin-end: 32;
+        
+        Gtk.Box {
+            orientation: vertical;
+            spacing: 16;
+
+            Gtk.ListBox dev_list_view {
+                styles ["boxed-list"]
+            }
+        }
+    };
+  }
+}

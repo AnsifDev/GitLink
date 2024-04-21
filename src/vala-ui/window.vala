@@ -24,6 +24,7 @@ using Gee;
 namespace Gitlink {
     [GtkTemplate (ui = "/com/asiet/lab/GitLink/gtk/window.ui")]
     public class Window : Adw.ApplicationWindow {
+        private bool configured = true;
 
         [GtkChild]
         private unowned Adw.NavigationView nav_view;
@@ -32,29 +33,33 @@ namespace Gitlink {
             Object (application: app);
             var client = Git.Client.get_default();
             var local_users = client.load_local_users();
-            //  if (local_users.size > 0) {
-            //      var home_page = new HomePage(local_users);
-            //      home_page.push_page.connect (nav_view.push);
-            //      home_page.close_page.connect (nav_view.pop);
-            //      nav_view.push(home_page);
-            //  }
+            if (configured) {
+                if (local_users.size > 0) {
+                    var home_page = new HomePage(local_users);
+                    home_page.push_page.connect (nav_view.push);
+                    home_page.close_page.connect (nav_view.pop);
+                    nav_view.push(home_page);
+                } else {
+                    var empty_page = new EmptyAccountPage(this);
+                    nav_view.push(empty_page);
+                }
+            } else {
+                var welcome_page = new WelcomePage ();
+                welcome_page.next.connect((type) => {
+                    var setup_page = new SetupPage(type);
+                    setup_page.next.connect(() => {
+                        var empty_page = new EmptyAccountPage(this);
+                        nav_view.push(empty_page);
+                    });
+                    push(setup_page);
+                });
+                push(welcome_page);
+            }
         }
 
-        [GtkCallback]
-        public void login() {
-            var login = new LoginWindow(this);
-            login.authenticated.connect((user) => { 
-                var client = Git.Client.get_default();
-                var local_users = client.load_local_users();
-                var home_page = new HomePage(local_users);
-                home_page.push_page.connect (nav_view.push);
-                home_page.close_page.connect (nav_view.pop);
-                nav_view.push(home_page); 
-                var user_page = new UserPage(user);
-                nav_view.push(user_page); 
-            });
-            login.present();
-        }
+        public void push (Adw.NavigationPage page) { nav_view.push(page); }
+
+        public bool pop () { return nav_view.pop(); }
 
         //  public void none() {
         //      var parent = Xdp.parent_new_gtk(this);

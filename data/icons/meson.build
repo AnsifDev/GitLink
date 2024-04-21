@@ -23,6 +23,12 @@ install_data(
     join_paths(symbolic_dir, ('right-large-symbolic.svg')),
     join_paths(symbolic_dir, ('document-edit-symbolic.svg')),
     join_paths(symbolic_dir, ('key4-symbolic.svg')),
+    join_paths(symbolic_dir, ('git-link-symbolic.svg')),
+    join_paths(symbolic_dir, ('welcome-logo-symbolic.svg')),
+    join_paths(symbolic_dir, ('people-symbolic.svg')),
+    join_paths(symbolic_dir, ('display-symbolic.svg')),
+    join_paths(symbolic_dir, ('person-symbolic.svg')),
+    join_paths(symbolic_dir, ('network-server-symbolic.svg')),
   ],
   install_dir: get_option('datadir') / 'icons' / symbolic_dir
 )

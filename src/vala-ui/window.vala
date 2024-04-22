@@ -24,7 +24,7 @@ using Gee;
 namespace Gitlink {
     [GtkTemplate (ui = "/com/asiet/lab/GitLink/gtk/window.ui")]
     public class Window : Adw.ApplicationWindow {
-        private bool configured = true;
+        private bool configured = false;
 
         [GtkChild]
         private unowned Adw.NavigationView nav_view;
@@ -48,8 +48,13 @@ namespace Gitlink {
                 welcome_page.next.connect((type) => {
                     var setup_page = new SetupPage(type);
                     setup_page.next.connect(() => {
-                        var empty_page = new EmptyAccountPage(this);
-                        nav_view.push(empty_page);
+                        if (type == SetupType.LAB_HOST) {
+                            var invigilator_page = new InvigilatorPage ();
+                            nav_view.push(invigilator_page);
+                        } else {
+                            var empty_page = new EmptyAccountPage(this);
+                            nav_view.push(empty_page);
+                        }
                     });
                     push(setup_page);
                 });

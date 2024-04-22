@@ -145,7 +145,7 @@ namespace Gitlink.Connection {
                 var a = (Posix.SockAddrIn*) temp.ifa_addr;
                 if (a->sin_family != Posix.AF_INET) continue;
                 InetAddress addr = new InetAddress.from_bytes ((uint8[]) a->sin_addr, Posix.AF_INET);
-                ipv4.add (addr.to_string ());
+                ipv4.add (@"$(temp.ifa_name): $addr");
             }
     
             return ipv4.to_array ();

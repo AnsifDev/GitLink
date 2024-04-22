@@ -54,6 +54,7 @@ blueprints_src = [
     'welcome_page.blp',
     'empty_account_page.blp',
     'setup_page.blp',
+    'invigilator_page.blp',
 ]
 
 blueprints_ui = []

@@ -17,12 +17,30 @@
  *
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
+using Gee, Gitlink.Connection;
 
 namespace Gitlink {
     public class Application : Adw.Application {
+        private bool _hotspot_active = false;
+        private HashMap<Client, string?> clients = new HashMap<Client, string?>();
+
+        public Server server { get; private set; default = new Server (); }
+        public bool hotspot_active { 
+            get { return _hotspot_active; } 
+            set { 
+                _hotspot_active = value;
+                if (value) { server.start (3000); hold(); }
+                else { server.stop(); release (); }
+            } 
+        }
+
         public Application () {
             Object (application_id: "com.asiet.lab.GitLink", flags: ApplicationFlags.DEFAULT_FLAGS);
         }
+
+        public string get_client_name(Client client) { return clients[client]; }
+
+        public Client[] get_connected_clients() { return clients.keys.to_array (); }
 
         construct {
             ActionEntry[] action_entries = {
@@ -32,6 +50,12 @@ namespace Gitlink {
             };
             this.add_action_entries (action_entries, this);
             this.set_accels_for_action ("app.quit", {"<primary>q"});
+
+            server.connected.connect ((client) => clients[client] = null );
+            server.disconnected.connect ((client) => clients.unset (client) );
+            server.on_message_received.connect ((client, action, payload) => {
+                if (action == "NAME") clients[client] = payload;
+            });
         }
 
         public new static Application get_default() {

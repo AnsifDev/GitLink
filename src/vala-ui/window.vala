@@ -46,17 +46,22 @@ namespace Gitlink {
             } else {
                 var welcome_page = new WelcomePage ();
                 welcome_page.next.connect((type) => {
-                    var setup_page = new SetupPage(type);
-                    setup_page.next.connect(() => {
-                        if (type == SetupType.LAB_HOST) {
-                            var invigilator_page = new InvigilatorPage ();
-                            nav_view.push(invigilator_page);
-                        } else {
-                            var empty_page = new EmptyAccountPage(this);
-                            nav_view.push(empty_page);
-                        }
-                    });
-                    push(setup_page);
+                    if (type == SetupType.LAB_HOST) {
+                        var invigilator_page = new InvigilatorPage ();
+                        nav_view.push(invigilator_page);
+                    } else {
+                        var setup_page = new SetupPage(type);
+                        setup_page.next.connect(() => {
+                            if (type == SetupType.LAB_HOST) {
+                                var invigilator_page = new InvigilatorPage ();
+                                nav_view.push(invigilator_page);
+                            } else {
+                                var empty_page = new EmptyAccountPage(this);
+                                nav_view.push(empty_page);
+                            }
+                        });
+                        push(setup_page);
+                    }
                 });
                 push(welcome_page);
             }

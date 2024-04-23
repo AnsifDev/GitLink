@@ -2,25 +2,49 @@ using Gtk, Gee;
 
 namespace Gitlink {
     class DevListRow: Adw.ActionRow {
+        private Connection.Client client;
+
         public DevListRow() {
             add_prefix (new Image.from_icon_name ("display-symbolic"));
+
+            var btn = new Button.with_label ("Remove");
+            btn.valign = Align.CENTER;
+            btn.margin_start = btn.margin_end = 6;
+            btn.clicked.connect (() => disconnect_client());
+            add_suffix (btn);
         }
+
+        public void bind(Connection.Client client) {
+            this.client = client;
+            var name = Gitlink.Application.get_default ().get_client_name (client);
+            title = name != null? name: client.inet_addr.to_string ();
+            if (name != null) subtitle = client.inet_addr.to_string ();
+        }
+
+        public void disconnect_client() {
+            client.end_connection ();
+        }
+
+        public signal void notify_model();
     }
 
     class DevListModel: RecycleViewModel {
-        private Gee.ArrayList<string> data;
+        private Gee.ArrayList<Connection.Client> data;
 
-        public DevListModel(Gee.ArrayList<string> data) {
+        public DevListModel(Gee.ArrayList<Connection.Client> data) {
             this.data = data;
             initialize ();
         }
 
         public override Gtk.ListBoxRow create_list_box_row () {
-            return new DevListRow();
+            var row = new DevListRow();
+            row.notify_model.connect (() => notify_data_set_changed ());
+            return row;
         }
         public override void on_bind (int position, Gtk.ListBoxRow list_box_row) {
             var dev_list_row = (DevListRow) list_box_row;
-            dev_list_row.title = data[position];
+            var client = data[position];
+            dev_list_row.bind (client);
         }
         public override uint get_n_items () {
             return data.size;
@@ -36,32 +60,40 @@ namespace Gitlink {
         [GtkChild]
         private unowned Gtk.ListBox dev_list_view;
 
-        public bool hotspot_active { get; set; default = false; }
+        public bool hotspot_active { get; set; }
         public string hotspot_img { get; set; default = "/com/asiet/lab/GitLink/assets/hotspot-off.png"; }
 
-        private Connection.Server server = new Connection.Server();
-        private ArrayList<string> clients = new ArrayList<string>();
+        private Connection.Server server = ((Gitlink.Application) Application.get_default ()).server;
+        private ArrayList<Connection.Client> clients = new ArrayList<Connection.Client>();
         private DevListModel model;
 
         public InvigilatorPage() {
             server.connected.connect ((client) => {
-                clients.add (client.inet_addr.to_string ());
+                clients.add (client);
                 model.notify_data_set_changed ();
                 dev_list_view.visible = true;
             });
 
             server.disconnected.connect ((client) => {
-                clients.remove (client.inet_addr.to_string ());
+                clients.remove (client);
                 model.notify_data_set_changed ();
                 dev_list_view.visible = clients.size != 0;
             });
 
-            var list = server.get_ipv4 ();
+            server.on_message_received.connect ((client, action, payload) => {
+                if (action == "NAME") model.notify_data_set_changed ();
+                print("%s: %s\n", action, payload);
+            });
+
+            Gitlink.Application.get_default ().bind_property ("hotspot_active", this, "hotspot_active", GLib.BindingFlags.BIDIRECTIONAL|GLib.BindingFlags.SYNC_CREATE, null, null);
+
+            foreach (var client in Gitlink.Application.get_default ().get_connected_clients())
+                clients.add (client);
             model = new DevListModel (clients);
-
             dev_list_view.bind_model (model, (widget) => (Widget) widget);
+            dev_list_view.visible = clients.size > 0;
 
-            foreach (var ip in list) {
+            foreach (var ip in server.get_ipv4 ()) {
                 if (ip.has_prefix ("lo")) continue;
                 var ip_raw = ip.split (" ")[1].strip();
 
@@ -91,8 +123,6 @@ namespace Gitlink {
 
         [GtkCallback]
         public bool on_state_changed(bool state) {
-            if (state) server.start (3000);
-            else server.stop ();
             hotspot_img = @"/com/asiet/lab/GitLink/assets/$(state? "hotspot": "hotspot-off").png";
             return false;
         }

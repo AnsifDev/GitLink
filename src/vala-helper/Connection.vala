@@ -25,7 +25,7 @@ namespace Gitlink.Connection {
     
         //  construct { inet_addr = (InetSocketAddress) conn.remote_address; }
     
-        public void end_connection() { service_canceller.cancel(); }
+        public void end_connection() { send_message("END"); conn.close(); }
         
         private void listener() throws Error {
             while (true) {
@@ -56,7 +56,7 @@ namespace Gitlink.Connection {
     
         public signal void disconnected();
     
-        public signal void on_message_received(string action, string? payload);
+        public signal void on_message_received(string action, string? payload) { if (action == "END") conn.close(); }
     
         public static async Client? connect_to_server(string ip, int port) throws Error {
             InetAddress address = new InetAddress.from_string (ip);
@@ -92,7 +92,9 @@ namespace Gitlink.Connection {
             socket.listen_backlog = 5;
             if (!socket.listen ()) return ConnectionResponse.LISTENING_FAILED;
             
+            service_canceller.reset();
             new Thread<void> ("Connection-Receiver", () => connection_listener (socket));
+            print("Started\n");
     
             return ConnectionResponse.OK;
         }
@@ -101,18 +103,22 @@ namespace Gitlink.Connection {
             service_canceller.cancel();
             if (socket != null) socket.close ();
             socket = null;
+            print("Stopped\n");
         }
     
         private void connection_listener(Socket socket) {
+            print("Listening\n");
             try {
                 while (true) {
                     var conn = socket.accept (service_canceller);
                     var client = new Client(conn);
+                    print("Accepted\n");
                     client.disconnected.connect((src) => disconnected(src));
                     client.on_message_received.connect((src, action, payload) => on_message_received(src, action, payload));
                     connected(client);
                 }
             } catch (Error e) {}
+            print("Listening Ended\n");
         }
     
         //  private void conn_handler(Socket conn) throws Error {
@@ -151,7 +157,7 @@ namespace Gitlink.Connection {
             return ipv4.to_array ();
         }
     
-        public virtual signal void connected(Client client);
+        public virtual signal void connected(Client client) { print("Event Fired: Connected\n"); }
     
         public virtual signal void disconnected(Client client);
 

@@ -13,6 +13,7 @@ gitlink_sources = [
   'vala-helper/ReposListModel.vala',
   'vala-helper/SSHConfigurations.vala',
   'vala-helper/Connection.vala',
+  'vala-helper/Bell.vala',
   'vala-git/Git.vala',
   'vala-git/GitUser.vala',
   'vala-git/GitClient.vala',

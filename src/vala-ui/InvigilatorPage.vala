@@ -61,13 +61,15 @@ namespace Gitlink {
         private unowned Gtk.ListBox dev_list_view;
 
         public bool hotspot_active { get; set; }
+        public bool alarm_ringing { get; set; }
         public string hotspot_img { get; set; default = "/com/asiet/lab/GitLink/assets/hotspot-off.png"; }
 
-        private Connection.Server server = ((Gitlink.Application) Application.get_default ()).server;
+        private Connection.Server server = Application.get_default ().server;
         private ArrayList<Connection.Client> clients = new ArrayList<Connection.Client>();
         private DevListModel model;
 
         public InvigilatorPage() {
+            Application.get_default ().bind_property("alarm_ringing", this, "alarm_ringing", GLib.BindingFlags.BIDIRECTIONAL|GLib.BindingFlags.SYNC_CREATE);
             server.connected.connect ((client) => {
                 clients.add (client);
                 model.notify_data_set_changed ();
@@ -82,9 +84,11 @@ namespace Gitlink {
 
             server.on_message_received.connect ((client, action, payload) => {
                 if (action == "NAME") model.notify_data_set_changed ();
-                if (action == "WARN") {
-                    var notification = new Notification (@"Malpractice Suspected on $()");
+                if (action == "MOUNT") {
+                    var row = (Adw.ActionRow) model.get_item(clients.index_of(client));
+                    row.add_css_class("error");
                 }
+                
                 print("%s: %s\n", action, payload);
             });
 
@@ -128,6 +132,15 @@ namespace Gitlink {
         public bool on_state_changed(bool state) {
             hotspot_img = @"/com/asiet/lab/GitLink/assets/$(state? "hotspot": "hotspot-off").png";
             return false;
+        }
+
+        [GtkCallback]
+        public void stop_alarm() {
+            alarm_ringing = false;
+            for (var i = 0; i < clients.size; i++) {
+                var row = (Adw.ActionRow) model.get_item(i);
+                row.remove_css_class("error");
+            }
         }
 
         //  [GtkCallback]

@@ -23,6 +23,8 @@ namespace Gitlink {
     public class Application : Adw.Application {
         private bool _hotspot_active = false;
         private HashMap<Client, string?> clients = new HashMap<Client, string?>();
+        public bool alarm_ringing { get; set; }
+        private Bell bell;
 
         public Server server { get; private set; default = new Server (); }
         public bool hotspot_active { 
@@ -51,10 +53,23 @@ namespace Gitlink {
             this.add_action_entries (action_entries, this);
             this.set_accels_for_action ("app.quit", {"<primary>q"});
 
+            bell = new Bell(File.new_for_uri ("resource:///com/asiet/lab/GitLink/assets/alarm1.mp3"));
+            bind_property ("alarm_ringing", bell, "ringing", GLib.BindingFlags.BIDIRECTIONAL|GLib.BindingFlags.SYNC_CREATE);
+
             server.connected.connect ((client) => clients[client] = null );
             server.disconnected.connect ((client) => clients.unset (client) );
             server.on_message_received.connect ((client, action, payload) => {
                 if (action == "NAME") clients[client] = payload;
+                if (action == "MOUNT") {
+                    var app = Application.get_default ();
+                    var dev = app.get_client_name (client);
+                    var notification = new Notification (@"Malpractice Detected");
+                    notification.set_body (@"There is an attempt to mount a files system on the device $dev");
+                    notification.set_priority (GLib.NotificationPriority.URGENT);
+                    alarm_ringing = true;
+                    app.send_notification (@"$dev-$payload", notification);
+                    print("Running\n");
+                }
             });
         }
 

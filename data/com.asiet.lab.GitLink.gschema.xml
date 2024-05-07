@@ -1,5 +1,19 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <schemalist gettext-domain="gitlink">
 	<schema id="com.asiet.lab.GitLink" path="/com/asiet/lab/GitLink/">
+		<key name="app-mode" type="s">
+			<default>'unknown'</default>
+			<choices>
+				<choice value='personal'/>
+				<choice value='lab-system'/>
+				<choice value='lab-host'/>
+			</choices>
+		</key>
+		<key name="host-ip" type="s">
+			<default>'0.0.0.0'</default>
+		</key>
+		<key name="dev-name" type="s">
+			<default>'None'</default>
+		</key>
 	</schema>
 </schemalist>

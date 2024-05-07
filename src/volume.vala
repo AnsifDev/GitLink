@@ -1,4 +1,4 @@
-public static int main (string[] args) {
+public static int mains (string[] args) {
 	MainLoop loop = new MainLoop ();
 
 	VolumeMonitor monitor = VolumeMonitor.get ();

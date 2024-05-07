@@ -23,6 +23,14 @@ template $GitlinkInvigilatorPage : Adw.NavigationPage {
       title: "Hotspot is turned off. No New Connections are accepted";
     }
 
+    [top]
+    Adw.Banner {
+      revealed: bind template.alarm_ringing;
+      title: "Malpractice Detected";
+      button-label: "Stop Alarm";
+      button-clicked => $stop_alarm();
+    }
+
     content: Adw.Clamp {
         margin-bottom: 24;
         margin-top: 24;
@@ -92,6 +100,7 @@ template $GitlinkInvigilatorPage : Adw.NavigationPage {
             Gtk.ListBox dev_list_view {
               styles ["boxed-list"]
               visible: false;
+              selection-mode: none;
             }
         }
     };

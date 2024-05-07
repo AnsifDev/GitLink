@@ -25,12 +25,14 @@ namespace Gitlink {
     [GtkTemplate (ui = "/com/asiet/lab/GitLink/gtk/window.ui")]
     public class Window : Adw.ApplicationWindow {
         private bool configured = false;
+        private GLib.Settings settings = new GLib.Settings ("com.asiet.lab.GitLink");
 
         [GtkChild]
         private unowned Adw.NavigationView nav_view;
 
         public Window (Gtk.Application app) {
             Object (application: app);
+            configured = settings.get_string ("app-mode") != "unknown";
             var client = Git.Client.get_default();
             var local_users = client.load_local_users();
             if (configured) {
@@ -49,16 +51,12 @@ namespace Gitlink {
                     if (type == SetupType.LAB_HOST) {
                         var invigilator_page = new InvigilatorPage ();
                         nav_view.push(invigilator_page);
+                        settings.set_string ("app-mode", "lab-host");
                     } else {
                         var setup_page = new SetupPage(type);
                         setup_page.next.connect(() => {
-                            if (type == SetupType.LAB_HOST) {
-                                var invigilator_page = new InvigilatorPage ();
-                                nav_view.push(invigilator_page);
-                            } else {
-                                var empty_page = new EmptyAccountPage(this);
-                                nav_view.push(empty_page);
-                            }
+                            var empty_page = new EmptyAccountPage(this);
+                            nav_view.push(empty_page);
                         });
                         push(setup_page);
                     }

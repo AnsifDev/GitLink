@@ -18,7 +18,7 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-int mains (string[] args) {
+int main (string[] args) {
     var app = new Gitlink.Application ();
     return app.run (args);
 }

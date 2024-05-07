@@ -24,6 +24,8 @@ namespace Gitlink {
         public string lab_name { get; set; default = ""; }
         public string ip_addr { get; set; default = ""; }
 
+        private GLib.Settings settings = new GLib.Settings ("com.asiet.lab.GitLink");
+
         public SetupPage(SetupType type) {
             this.type = type;
             personal_type = type == SetupType.PERSONAL;
@@ -45,6 +47,9 @@ namespace Gitlink {
 
         [GtkCallback]
         public void next_page() {
+            settings.set_string("app-mode", personal_type? "personal": "lab-system");
+            settings.set_string("dev-name", dev_name);
+            if (lab_client_type) settings.set_string("host-ip", ip_addr);
             next();
         }
 

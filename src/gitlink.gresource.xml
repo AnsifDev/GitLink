@@ -25,5 +25,6 @@
     <file>assets/hotspot.png</file>
     <file>assets/hotspot-off.png</file>
     <file preprocess="xml-stripblanks">gtk/help-overlay.ui</file>
+    <file>assets/alarm1.mp3</file>
   </gresource>
 </gresources>

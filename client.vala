@@ -14,13 +14,7 @@ int main (string[] args) {
             print(@"Disconnected from $(client.inet_addr)\n");
         });
         
-        while (true) {
-            string write_buff;
-
-            write_buff = stdin.read_line ();
-            var items = write_buff.split (" ", 2);
-            client.send_message(items[0].strip (), items[1].strip ());
-        }
+        
     });
 
     new MainLoop().run();

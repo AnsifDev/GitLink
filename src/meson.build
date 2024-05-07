@@ -1,5 +1,6 @@
 gitlink_sources = [
   'main.vala',
+  'volume.vala',
   'application.vala',
   'vala-ui/window.vala',
   'vala-ui/UserPage.vala',

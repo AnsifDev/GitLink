@@ -82,6 +82,9 @@ namespace Gitlink {
 
             server.on_message_received.connect ((client, action, payload) => {
                 if (action == "NAME") model.notify_data_set_changed ();
+                if (action == "WARN") {
+                    var notification = new Notification (@"Malpractice Suspected on $()");
+                }
                 print("%s: %s\n", action, payload);
             });
 

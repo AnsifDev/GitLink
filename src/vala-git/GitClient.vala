@@ -266,7 +266,7 @@ namespace Git {
                 else if (response_map["error"] != "authorization_pending") break;
 
                 print(" [Not Authenticated]\n");
-                Timeout.add_seconds_once(interval*2, () => { authenticate.callback(); });
+                Timeout.add_seconds(interval*2, () => { authenticate.callback(); return false; });
                 yield;
             }
 

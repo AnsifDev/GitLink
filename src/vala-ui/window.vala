@@ -24,7 +24,6 @@ using Gee;
 namespace Gitlink {
     [GtkTemplate (ui = "/com/asiet/lab/GitLink/gtk/window.ui")]
     public class Window : Adw.ApplicationWindow {
-        private bool configured = false;
         private GLib.Settings settings = new GLib.Settings ("com.asiet.lab.GitLink");
 
         [GtkChild]
@@ -32,20 +31,9 @@ namespace Gitlink {
 
         public Window (Gtk.Application app) {
             Object (application: app);
-            configured = settings.get_string ("app-mode") != "unknown";
             var client = Git.Client.get_default();
             var local_users = client.load_local_users();
-            if (configured) {
-                if (local_users.size > 0) {
-                    var home_page = new HomePage(local_users);
-                    home_page.push_page.connect (nav_view.push);
-                    home_page.close_page.connect (nav_view.pop);
-                    nav_view.push(home_page);
-                } else {
-                    var empty_page = new EmptyAccountPage(this);
-                    nav_view.push(empty_page);
-                }
-            } else {
+            if (settings.get_string ("app-mode") == "unknown" || true) {
                 var welcome_page = new WelcomePage ();
                 welcome_page.next.connect((type) => {
                     if (type == SetupType.LAB_HOST) {
@@ -55,13 +43,30 @@ namespace Gitlink {
                     } else {
                         var setup_page = new SetupPage(type);
                         setup_page.next.connect(() => {
+                            Application.get_default ().client_active = true;
                             var empty_page = new EmptyAccountPage(this);
                             nav_view.push(empty_page);
                         });
                         push(setup_page);
                     }
+                    
                 });
                 push(welcome_page);
+            } else if (settings.get_string ("app-mode") == "lab-host") {
+                var invigilator_page = new InvigilatorPage ();
+                nav_view.push(invigilator_page);
+                settings.set_string ("app-mode", "lab-host");
+            } else {
+                Application.get_default ().client_active = true;
+                if (local_users.size > 0) {
+                    var home_page = new HomePage(local_users);
+                    home_page.push_page.connect (nav_view.push);
+                    home_page.close_page.connect (nav_view.pop);
+                    nav_view.push(home_page);
+                } else {
+                    var empty_page = new EmptyAccountPage(this);
+                    nav_view.push(empty_page);
+                }
             }
         }
 

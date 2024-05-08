@@ -7,13 +7,14 @@
 				<choice value='personal'/>
 				<choice value='lab-system'/>
 				<choice value='lab-host'/>
+				<choice value='unknown'/>
 			</choices>
 		</key>
 		<key name="host-ip" type="s">
-			<default>'0.0.0.0'</default>
+			<default>''</default>
 		</key>
 		<key name="dev-name" type="s">
-			<default>'None'</default>
+			<default>''</default>
 		</key>
 	</schema>
 </schemalist>

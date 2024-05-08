@@ -34,6 +34,9 @@ namespace Gitlink {
 
             var type_name = type == SetupType.PERSONAL? "Personal": type == SetupType.LAB_CLIENT? "Lab Student": "Lab Invigilator";
             title = @"Setup As $type_name System";
+
+            settings.bind("dev-name", this, "dev_name", GLib.SettingsBindFlags.DEFAULT);
+            settings.bind("host-ip", this, "ip_addr", GLib.SettingsBindFlags.DEFAULT);
         }
 
         [GtkCallback]
@@ -48,8 +51,6 @@ namespace Gitlink {
         [GtkCallback]
         public void next_page() {
             settings.set_string("app-mode", personal_type? "personal": "lab-system");
-            settings.set_string("dev-name", dev_name);
-            if (lab_client_type) settings.set_string("host-ip", ip_addr);
             next();
         }
 

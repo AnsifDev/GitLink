@@ -36,6 +36,41 @@ namespace Gitlink {
             } 
         }
 
+        public Client client { get; private set; }
+        private bool _client_active = false;
+        public bool client_active { 
+            get { return _client_active; } 
+            set {
+                if (value) {
+                    if (client != null) return;
+                    Client.connect_to_server.begin(settings.get_string("host-ip"), 3000, (src, res) => {
+                        try {
+                            client = Client.connect_to_server.end(res);
+                            if (client == null) return;
+                            Timeout.add_once(1000, () => client.send_message("NAME", settings.get_string("dev-name")));
+                            
+                            client.disconnected.connect(() => {                                
+                                client = null;
+                                Idle.add_once(release);
+                                client_active = false;
+                                print("Disconnected\n");
+                            });
+                            
+                            _client_active = true;
+                            print("OnHold");
+                            Idle.add_once(hold);
+                        } catch (Error e) {}
+                    });
+                } else {
+                    if (client == null) return;
+                    client.end_connection ();
+                    client = null;
+                    release ();
+                }
+            }
+        }
+        private GLib.Settings settings = new GLib.Settings ("com.asiet.lab.GitLink");
+
         public Application () {
             Object (application_id: "com.asiet.lab.GitLink", flags: ApplicationFlags.DEFAULT_FLAGS);
         }

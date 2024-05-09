@@ -37,6 +37,7 @@ namespace Gitlink {
 
             settings.bind("dev-name", this, "dev_name", GLib.SettingsBindFlags.DEFAULT);
             settings.bind("host-ip", this, "ip_addr", GLib.SettingsBindFlags.DEFAULT);
+            settings.bind("lab-name", this, "lab_name", GLib.SettingsBindFlags.DEFAULT);
         }
 
         [GtkCallback]

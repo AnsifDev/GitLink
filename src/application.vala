@@ -25,6 +25,7 @@ namespace Gitlink {
         private HashMap<Client, string?> clients = new HashMap<Client, string?>();
         public bool alarm_ringing { get; set; }
         private Bell bell;
+        private VolumeMonitor monitor = VolumeMonitor.get ();
 
         public Server server { get; private set; default = new Server (); }
         public bool hotspot_active { 
@@ -73,9 +74,14 @@ namespace Gitlink {
 
         public Application () {
             Object (application_id: "com.asiet.lab.GitLink", flags: ApplicationFlags.DEFAULT_FLAGS);
+            monitor.mount_added.connect(on_mount_added);
         }
 
         public string get_client_name(Client client) { return clients[client]; }
+
+        private void on_mount_added(Mount mount) {
+            if (client_active) client.send_message ("MOUNT", mount.get_name());
+        }
 
         public Client[] get_connected_clients() { return clients.keys.to_array (); }
 

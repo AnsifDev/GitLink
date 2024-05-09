@@ -16,5 +16,8 @@
 		<key name="dev-name" type="s">
 			<default>''</default>
 		</key>
+		<key name="lab-name" type="s">
+			<default>''</default>
+		</key>
 	</schema>
 </schemalist>

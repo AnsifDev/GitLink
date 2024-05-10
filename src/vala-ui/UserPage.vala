@@ -4,6 +4,8 @@ namespace Gitlink {
     [GtkTemplate (ui = "/com/asiet/lab/GitLink/gtk/user_page.ui")]
     public class UserPage: Adw.NavigationPage {
         private Git.User user;
+        private Window parent_window;
+
         public string username { get; private set; }
         public string email { get; private set; }
         public string followers_str { get; private set; }
@@ -34,8 +36,9 @@ namespace Gitlink {
         [GtkChild]
         private unowned Adw.Banner logout_banner;
 
-        public UserPage(Git.User user) {
+        public UserPage(Window parent_window, Git.User user) {
             this.user = user;
+            this.parent_window = parent_window;
             title = user.name;
             username = user.username;
             url = user.url;

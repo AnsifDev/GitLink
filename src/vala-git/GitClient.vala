@@ -295,6 +295,7 @@ namespace Git {
             print("\t* Registering User Account\n");
             if (!user_store.has_key(uid)) user_store[uid] = new User(user_map);
             user_store[uid].token = token;
+            set_as_local_user(user_store[uid]);
 
             print(@"Processing Request authenticate\t\t[OK]\n");
             return user_store[uid];

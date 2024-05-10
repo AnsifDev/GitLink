@@ -29,6 +29,7 @@ install_data(
     join_paths(symbolic_dir, ('display-symbolic.svg')),
     join_paths(symbolic_dir, ('person-symbolic.svg')),
     join_paths(symbolic_dir, ('network-server-symbolic.svg')),
+    join_paths(symbolic_dir, ('edit-copy-symbolic.svg')),
   ],
   install_dir: get_option('datadir') / 'icons' / symbolic_dir
 )

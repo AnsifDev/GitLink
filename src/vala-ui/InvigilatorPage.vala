@@ -67,8 +67,11 @@ namespace Gitlink {
         private Connection.Server server = Application.get_default ().server;
         private ArrayList<Connection.Client> clients = new ArrayList<Connection.Client>();
         private DevListModel model;
+        private Window parent_window;
 
-        public InvigilatorPage() {
+        public InvigilatorPage(Window parent_window) {
+            this.parent_window = parent_window;
+
             Application.get_default ().bind_property("alarm_ringing", this, "alarm_ringing", GLib.BindingFlags.BIDIRECTIONAL|GLib.BindingFlags.SYNC_CREATE);
             server.connected.connect ((client) => {
                 clients.add (client);

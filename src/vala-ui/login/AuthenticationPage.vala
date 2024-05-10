@@ -21,21 +21,21 @@ namespace Gitlink {
         
         public AuthenticationPage(LoginWindow parent_window) {
             this.parent_window = parent_window;
-            btn_authorize.sensitive = true;
-            auth_label = "Authorize";
+            //  btn_authorize.sensitive = true;
+            auth_label = "Setting up";
             
-            //  Git.get_login_code.begin((src, res) => {
-            //      try {
-            //          var response_map = Git.get_login_code.end(res);
-            //          device_code = (string) response_map["device_code"];
-            //          user_code = (string) response_map["user_code"];
-            //          interval = (int64) response_map["interval"];
-            //          expire = (int64) response_map["expires_in"];
+            Git.get_login_code.begin((src, res) => {
+                try {
+                    var response_map = Git.get_login_code.end(res);
+                    device_code = (string) response_map["device_code"];
+                    user_code = (string) response_map["user_code"];
+                    interval = (int64) response_map["interval"];
+                    expire = (int64) response_map["expires_in"];
 
-            //          btn_authorize.sensitive = true;
-            //          auth_label = "Authorize";
-            //      } catch (Error e) { print(e.message); }
-            //  });
+                    btn_authorize.sensitive = true;
+                    auth_label = "Authorize";
+                } catch (Error e) { print(e.message); }
+            });
         }
 
         [GtkCallback]
@@ -49,8 +49,8 @@ namespace Gitlink {
         private async Git.User authenticate() throws Error {
             var client = Git.Client.get_default();
 
-            //  var user = yield client.authenticate(device_code, (int) expire, (int) interval);
-            var user = client.load_local_users()[0];
+            var user = yield client.authenticate(device_code, (int) expire, (int) interval);
+            //  var user = client.load_local_users()[0];
             
             var resp = yield Git.request("user/keys", user);
             user.remote_ssh_keys = new JsonEngine().parse_string_to_array(resp);
@@ -59,9 +59,9 @@ namespace Gitlink {
 
         [GtkCallback]
         private void authorize() {
-            //  var launcher = new UriLauncher("https://github.com/login/device");
-            //  launcher.launch.begin(this, null);
-            //  if (!polling) {
+            var launcher = new UriLauncher("https://github.com/login/device");
+            launcher.launch.begin(parent_window, null);
+            if (!polling) {
                 polling = true;
                 authenticate.begin((src, res) => {
                     try {
@@ -73,10 +73,8 @@ namespace Gitlink {
                         msg.add_response("ok", "OK");
                         msg.present();
                     }
-
-            //          close();
                 });
-            //  }
+            }
         }
     }
 }

@@ -4,7 +4,6 @@
     <file>style.css</file>
     <file>gtk/window.ui</file>
     <file>gtk/user_page.ui</file>
-    <file>gtk/home_page.ui</file>
     <file>gtk/display_card.ui</file>
     <file>gtk/repos_row.ui</file>
     <file>gtk/repo_clone_dialog.ui</file>
@@ -14,7 +13,7 @@
     <file>gtk/ssh_config_page.ui</file>
     <file>gtk/ssh_create_page.ui</file>
     <file>gtk/welcome_page.ui</file>
-    <file>gtk/empty_account_page.ui</file>
+    <file>gtk/accounts_page.ui</file>
     <file>gtk/setup_page.ui</file>
     <file>gtk/invigilator_page.ui</file>
     <file>assets/config.png</file>

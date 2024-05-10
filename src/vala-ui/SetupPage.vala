@@ -10,6 +10,7 @@ namespace Gitlink {
     [GtkTemplate (ui = "/com/asiet/lab/GitLink/gtk/setup_page.ui")]
     class SetupPage: Adw.NavigationPage {
         private SetupType type;
+        private Window parent_window;
         
         public bool personal_type { get; private set; default = false; }
         public bool lab_client_type { get; private set; default = false; }
@@ -26,8 +27,9 @@ namespace Gitlink {
 
         private GLib.Settings settings = new GLib.Settings ("com.asiet.lab.GitLink");
 
-        public SetupPage(SetupType type) {
+        public SetupPage(Window parent_window, SetupType type) {
             this.type = type;
+            this.parent_window = parent_window;
             personal_type = type == SetupType.PERSONAL;
             lab_client_type = type == SetupType.LAB_CLIENT;
             lab_host_type = type == SetupType.LAB_HOST;
@@ -52,9 +54,8 @@ namespace Gitlink {
         [GtkCallback]
         public void next_page() {
             settings.set_string("app-mode", personal_type? "personal": "lab-system");
-            next();
+            parent_window.nav_view.pop_to_tag("welcome");
+            parent_window.nav_view.push(new AccountsPage(parent_window));
         }
-
-        public signal void next();
     }
 }

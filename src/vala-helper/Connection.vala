@@ -66,7 +66,8 @@ namespace Gitlink.Connection {
             assert (socket != null);
 
             var t = new Thread<bool>(null, () => {
-                try { socket.connect (inetaddress); } catch (Error e) { critical(e.message); return false; }
+                try { socket.connect (inetaddress); } 
+                catch (Error e) { Idle.add(connect_to_server.callback); return false; }
                 Idle.add(connect_to_server.callback);
                 return true;
             }); yield;

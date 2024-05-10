@@ -27,52 +27,24 @@ namespace Gitlink {
         private GLib.Settings settings = new GLib.Settings ("com.asiet.lab.GitLink");
 
         [GtkChild]
-        private unowned Adw.NavigationView nav_view;
+        public unowned Adw.NavigationView nav_view;
 
         public Window (Gtk.Application app) {
             Object (application: app);
-            var client = Git.Client.get_default();
-            var local_users = client.load_local_users();
-            if (settings.get_string ("app-mode") == "unknown" || true) {
-                var welcome_page = new WelcomePage ();
-                welcome_page.next.connect((type) => {
-                    if (type == SetupType.LAB_HOST) {
-                        var invigilator_page = new InvigilatorPage ();
-                        nav_view.push(invigilator_page);
-                        settings.set_string ("app-mode", "lab-host");
-                    } else {
-                        var setup_page = new SetupPage(type);
-                        setup_page.next.connect(() => {
-                            Application.get_default ().client_active = true;
-                            var empty_page = new EmptyAccountPage(this);
-                            nav_view.push(empty_page);
-                        });
-                        push(setup_page);
-                    }
-                    
-                });
-                push(welcome_page);
-            } else if (settings.get_string ("app-mode") == "lab-host") {
-                var invigilator_page = new InvigilatorPage ();
-                nav_view.push(invigilator_page);
-                settings.set_string ("app-mode", "lab-host");
-            } else {
-                Application.get_default ().client_active = true;
-                if (local_users.size > 0) {
-                    var home_page = new HomePage(local_users);
-                    home_page.push_page.connect (nav_view.push);
-                    home_page.close_page.connect (nav_view.pop);
-                    nav_view.push(home_page);
-                } else {
-                    var empty_page = new EmptyAccountPage(this);
-                    nav_view.push(empty_page);
-                }
-            }
+
+            //  nav_view.
+            if (settings.get_string ("app-mode") == "lab-host") nav_view.push(new InvigilatorPage (this));
+            else if (settings.get_string ("app-mode") != "unknown") nav_view.push(new AccountsPage(this));
         }
 
-        public void push (Adw.NavigationPage page) { nav_view.push(page); }
+        [GtkCallback]
+        private void setup_personal() { nav_view.push(new SetupPage(this, SetupType.PERSONAL)); }
+            
+        [GtkCallback]
+        private void setup_lab_client() { nav_view.push(new SetupPage(this, SetupType.LAB_CLIENT)); }
 
-        public bool pop () { return nav_view.pop(); }
+        [GtkCallback]
+        private void setup_lab_host() { nav_view.push(new InvigilatorPage(this)); }
 
         //  public void none() {
         //      var parent = Xdp.parent_new_gtk(this);

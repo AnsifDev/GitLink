@@ -9,6 +9,7 @@ namespace Gitlink {
         private AccountsListModel model;
         private Window parent_window;
         private ArrayList<Git.User> local_users;
+        private GLib.Settings settings;
 
         public bool connected { get; set; }
         public bool app_mode_lab { get; set; }
@@ -17,7 +18,7 @@ namespace Gitlink {
         public AccountsPage(Window parent_window) {
             this.parent_window = parent_window;
 
-            var settings = new GLib.Settings("com.asiet.lab.GitLink");
+            settings = new GLib.Settings("com.asiet.lab.GitLink");
             app_mode_lab = settings.get_string("app-mode") == "lab-system";
 
             var app = Application.get_default();
@@ -29,7 +30,6 @@ namespace Gitlink {
 
             model = new AccountsListModel(local_users);
             list_box.bind_model (model, (obj) => obj as Widget);
-            if (model.get_n_items () > 0) list_box.select_row (model.get_item (0) as ListBoxRow);
 
             list_box.row_activated.connect((obj, row) => {
                 //  view_account(model.get_data_for_row(row) as HashMap<string, Value?>);
@@ -40,6 +40,12 @@ namespace Gitlink {
         public override void shown() {
             model.notify_data_set_changed();
             empty_accounts = local_users.size == 0;
+            var allow_multi_user = settings.get_boolean("allow-multiple-users");
+            if (model.get_n_items () > 0) {
+                list_box.select_row (model.get_item (0) as ListBoxRow);
+                if (!app_mode_lab && !allow_multi_user) parent_window.nav_view.push(new UserPage(parent_window, local_users[0]));
+            }
+            
         }
 
         [GtkCallback]
@@ -64,6 +70,11 @@ namespace Gitlink {
                 parent_window.nav_view.push(new UserPage(parent_window, user)); 
             });
             login.present();
+        }
+        
+        [GtkCallback]
+        public void preferences() {
+            new PreferencesDialog().present(parent_window);
         }
     }
 }

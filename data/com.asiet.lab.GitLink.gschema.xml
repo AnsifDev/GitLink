@@ -19,5 +19,8 @@
 		<key name="lab-name" type="s">
 			<default>''</default>
 		</key>
+		<key name="allow-multiple-users" type="b">
+			<default>false</default>
+		</key>
 	</schema>
 </schemalist>

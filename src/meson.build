@@ -23,7 +23,9 @@ gitlink_sources = [
   'vala-ui/login/SSHCreatePage.vala',
   'vala-ui/AccountsPage.vala',
   'vala-ui/SetupPage.vala',
-  'vala-ui/InvigilatorPage.vala'
+  'vala-ui/InvigilatorPage.vala',
+  'vala-ui/ValueValidator.vala',
+  'vala-ui/PreferencesDialog.vala'
 ]
 
 gitlink_deps = [
@@ -52,6 +54,8 @@ blueprints_src = [
     'accounts_page.blp',
     'setup_page.blp',
     'invigilator_page.blp',
+    'preferences_dialog.blp',
+    'value_validator.blp',
 ]
 
 blueprints_ui = []

@@ -11,6 +11,12 @@ template $GitlinkAccountsPage: Adw.NavigationPage {
     Adw.HeaderBar {
       [end]
       Button {
+        icon-name: "settings-symbolic";
+        clicked => $preferences();
+      }
+      
+      [end]
+      Button {
         icon-name: "list-add-symbolic";
         clicked => $login();
         visible: bind template.empty_accounts inverted;

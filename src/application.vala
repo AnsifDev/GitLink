@@ -31,6 +31,7 @@ namespace Gitlink {
         public bool hotspot_active { 
             get { return _hotspot_active; } 
             set { 
+                if (_hotspot_active == value) return;
                 _hotspot_active = value;
                 if (value) { server.start (3000); hold(); }
                 else { server.stop(); release (); }

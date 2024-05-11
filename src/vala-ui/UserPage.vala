@@ -5,33 +5,31 @@ namespace Gitlink {
     public class UserPage: Adw.NavigationPage {
         private Git.User user;
         private Window parent_window;
+        private bool _allow_multi_user = false;
+        private bool app_mode_lab = false;
 
         public string username { get; private set; }
         public string email { get; private set; }
         public string followers_str { get; private set; }
         public string following_str { get; private set; }
         public string url { get; private set; }
+        public bool allow_multi_user {
+            get { return _allow_multi_user; }
+            set {
+                _allow_multi_user = value;
+                can_pop = app_mode_lab || allow_multi_user;
+                logout_banner.revealed = user.token != null && app_mode_lab;
+            }
+        }
 
         [GtkChild]
         private unowned ListBox dw_repo_list;
 
-        //  [GtkChild]
-        //  private unowned ListBox remote_repo_list;
-
         [GtkChild]
         private unowned Adw.PreferencesGroup downloaded;
 
-        //  [GtkChild]
-        //  private unowned Adw.PreferencesGroup remote_repos;
-
-        //  [GtkChild]
-        //  private unowned Button btn_create_new;
-
         [GtkChild]
         private unowned Adw.StatusPage empty_repos;
-
-        //  [GtkChild]
-        //  private unowned Adw.StatusPage data_fetch_error;
 
         [GtkChild]
         private unowned Adw.Banner logout_banner;
@@ -46,14 +44,12 @@ namespace Gitlink {
             followers_str = @"$(user.followers) Followers";
             following_str = @"$(user.following) Following";
 
-            logout_banner.revealed = user.token != null;
-            //  client.get_authenticated_user.begin((src, result) => {
-            //      var auth_user = client.get_authenticated_user.end(result);
-            //      if (auth_user != null) auth_user.username == username;
-            //  });
-
             try { load_repositories(); }
             catch (Error e) { print(@"ERR: $(e.message)\n"); }
+
+            var settings = new GLib.Settings("com.asiet.lab.GitLink");
+            app_mode_lab = settings.get_string("app-mode") == "lab-system";
+            settings.bind("allow-multiple-users", this, "allow_multi_user", GLib.SettingsBindFlags.GET);
         }
 
         private void load_repositories() throws Error {
@@ -83,15 +79,57 @@ namespace Gitlink {
             //      } else empty_repos.visible = true;
             //  });
         }
-
+        
         [GtkCallback]
         public void preferences() {
-            print("preferences\n");
+            new PreferencesDialog().present(parent_window);
         }
 
         [GtkCallback]
         public void logout() {
-            print("logout\n");
+            var logout_msg = new Adw.AlertDialog("Logout?", "You are going to logout from this device. Choose the actions to perform");
+            logout_msg.add_response("cancel", "Cancel");
+            logout_msg.add_response("ok", "Logout");
+            logout_msg.set_response_appearance("ok", Adw.ResponseAppearance.DESTRUCTIVE);
+            logout_msg.set_response_enabled("ok", user.token != null);
+            logout_msg.present(this);
+
+            var listbox = new Gtk.ListBox();
+            listbox.add_css_class("boxed-list");
+            listbox.selection_mode = Gtk.SelectionMode.NONE;
+            logout_msg.extra_child = listbox;
+
+            var online_logout_row = new Adw.ActionRow();
+            online_logout_row.title = "Logout from GitHub";
+            online_logout_row.subtitle = "Unlink your github account from GitLink app";
+            online_logout_row.sensitive = user.token != null && app_mode_lab;
+            listbox.append(online_logout_row);
+
+            var online_logout_checkbox = new Gtk.CheckButton();
+            online_logout_checkbox.add_css_class("selection-mode");
+            online_logout_checkbox.active = true;
+            online_logout_row.activatable_widget = online_logout_checkbox;
+            online_logout_row.add_prefix(online_logout_checkbox);
+
+            var local_logout_row = new Adw.ActionRow();
+            local_logout_row.title = "Logout from GitLink";
+            local_logout_row.subtitle = "Remove the account locally and wipe user data";
+            listbox.append(local_logout_row);
+
+            var local_logout_checkbox = new Gtk.CheckButton();
+            local_logout_checkbox.add_css_class("selection-mode");
+            if (!app_mode_lab) local_logout_checkbox.active = true;
+            local_logout_row.activatable_widget = local_logout_checkbox;
+            local_logout_row.add_prefix(local_logout_checkbox);
+
+            online_logout_checkbox.toggled.connect(() => {
+                logout_msg.set_response_enabled("ok", (user.token != null && online_logout_checkbox.active) || local_logout_checkbox.active);
+            });
+            local_logout_checkbox.toggled.connect(() => {
+                logout_msg.set_response_enabled("ok", (user.token != null && online_logout_checkbox.active) || local_logout_checkbox.active); 
+                if (local_logout_checkbox.active || !app_mode_lab) online_logout_checkbox.active = local_logout_checkbox.active;
+                if (app_mode_lab) online_logout_row.sensitive = !local_logout_checkbox.active;
+            });
         }
 
         [GtkCallback]

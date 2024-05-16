@@ -160,10 +160,10 @@ template $GitlinkUserPage : Adw.NavigationPage {
 
           Adw.StatusPage empty_repos {
             height-request: 250;
-            visible: false;
             vexpand: true;
             valign: center;
             title: "Clone Repositories";
+            visible: bind downloaded.visible inverted;
             description: "There is no local repositories for your account. Add some to get started";
           
             Button {

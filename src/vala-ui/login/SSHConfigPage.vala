@@ -70,7 +70,7 @@ namespace Gitlink {
         public KeyListModel(LoginWindow parent_window, Gee.ArrayList<LocalKey> data) {
             this.parent_window = parent_window;
             this.data = data;
-            initialize ();
+            //  initialize ();
         }
 
         public override Gtk.ListBoxRow create_list_box_row () {
@@ -91,7 +91,7 @@ namespace Gitlink {
                 notify_data_set_changed(index, 0, -1);
             };
         }
-        public override uint get_n_items () {
+        public override int get_size () {
             return data.size;
         }
 

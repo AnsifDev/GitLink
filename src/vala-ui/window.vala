@@ -35,6 +35,21 @@ namespace Gitlink {
             //  nav_view.
             if (settings.get_string ("app-mode") == "lab-host") nav_view.push(new InvigilatorPage (this));
             else if (settings.get_string ("app-mode") != "unknown") nav_view.push(new AccountsPage(this));
+
+            if (!settings.get_boolean("known-host-configured")) Git.register_host.begin("github.com", register_host_cb);
+        }
+
+        public void register_host_cb (Object? src, AsyncResult res) {
+            var success = false;
+            try { success = Git.register_host.end(res); }
+            catch (Error e) { print("ERR: %s\n", e.message); }
+
+            if (success) settings.set_boolean("known-host-configured", true);
+            else {
+                var dg = new Adw.AlertDialog("Host Registeration Failed", "Unable to register github.com to known hosts list of ssh. Your git communications are temperarily done due to this issue\n");
+                dg.add_responses("ignore", "Ignore For Now", "retry", "Retry Registeration");
+                dg.response.connect((res) => { if (res == "retry") Git.register_host.begin("github.com", register_host_cb); } );
+            }
         }
 
         [GtkCallback]
@@ -44,7 +59,10 @@ namespace Gitlink {
         private void setup_lab_client() { nav_view.push(new SetupPage(this, SetupType.LAB_CLIENT)); }
 
         [GtkCallback]
-        private void setup_lab_host() { nav_view.push(new InvigilatorPage(this)); }
+        private void setup_lab_host() { 
+            settings.set_string("app-mode", "lab-host");
+            nav_view.push(new InvigilatorPage(this)); 
+        }
 
         //  public void none() {
         //      var parent = Xdp.parent_new_gtk(this);

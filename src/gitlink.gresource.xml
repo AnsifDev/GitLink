@@ -17,6 +17,8 @@
     <file>gtk/invigilator_page.ui</file>
     <file>gtk/preferences_dialog.ui</file>
     <file>gtk/value_validator.ui</file>
+    <file>gtk/repo_details_dialog.ui</file>
+    <file>gtk/repo_remove_alert.ui</file>
     <file>assets/config.png</file>
     <file>assets/lab_client.png</file>
     <file>assets/lab_host.png</file>

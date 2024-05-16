@@ -46,6 +46,7 @@ template $GitlinkPreferencesDialog : Adw.PreferencesDialog {
             Adw.ActionRow {
                 title: "Device Name";
                 subtitle: bind template.dev_name;
+                visible: bind template.lab_host_type inverted;
                 activated => $change_dev_name();
                 activatable: true;
                 styles ["property"]

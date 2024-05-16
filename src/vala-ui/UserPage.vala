@@ -7,6 +7,8 @@ namespace Gitlink {
         private Window parent_window;
         private bool _allow_multi_user = false;
         private bool app_mode_lab = false;
+        private ReposListModel repos_list_model;
+        private ArrayList<Git.Repository> local_repos;
 
         public string username { get; private set; }
         public string email { get; private set; }
@@ -55,29 +57,28 @@ namespace Gitlink {
         private void load_repositories() throws Error {
             var client = Git.Client.get_default();
 
-            var local_repos = client.load_local_repositories(user);
-            //  var local_repos = new ArrayList<Git.Repository>();
-            //  var remote_repositories = new ArrayList<Git.Repository>();
-            if (local_repos.size > 0) {
-                downloaded.visible = true;
-                dw_repo_list.bind_model(new ReposListModel(local_repos), (item) => item as Widget);
-            } else empty_repos.visible = true;
+            local_repos = client.load_local_repositories(user);
+            repos_list_model = new ReposListModel(local_repos);
+            dw_repo_list.bind_model(repos_list_model, (item) => item as Widget);
+            downloaded.visible = local_repos.size > 0;
+
+            dw_repo_list.row_activated.connect((row) => {
+                var repos_row = row as ReposRow;
+                var dg = new RepoDetailsDialog (repos_row.repo);
+                dg.clone_complete.connect(() => {
+                    local_repos.add(repos_row.repo);
+                    repos_list_model.notify_data_set_changed();
+                    if (local_repos.size == 1) downloaded.visible = true;
+                });
+                dg.wipe_complete.connect(() => {
+                    local_repos.remove(repos_row.repo);
+                    repos_list_model.notify_data_set_changed();
+                    if (local_repos.size == 0) downloaded.visible = false;
+                });
+                dg.present (this);
+            });
 
             client.load_repositories.begin(user);
-
-            //  client.load_repositories.begin(user, (src, result) => {
-            //      var remote_repositories = client.load_repositories.end(result);
-            //      if (remote_repositories == null) {
-            //          data_fetch_error.visible = true;
-            //          return;
-            //      }
- 
-            //      //  foreach (var repo in local_repos) remote_repositories.remove(repo);
-            //      if (remote_repositories.size > 0) {
-            //          remote_repos.visible = true;
-            //          remote_repo_list.bind_model(new ReposListModel(remote_repositories), (item) => item as Widget);
-            //      } else empty_repos.visible = true;
-            //  });
         }
         
         [GtkCallback]
@@ -135,7 +136,18 @@ namespace Gitlink {
         [GtkCallback]
         public void clone_repo() {
             var dialog = new RepoCloneDialog(this.user);
-            dialog.present();
+            dialog.clone_complete.connect((repo) => {
+                local_repos.add(repo);
+                repos_list_model.notify_data_set_changed();
+                if (local_repos.size == 1) downloaded.visible = true;
+            });
+            dialog.wipe_complete.connect((repo) => {
+                local_repos.remove(repo);
+                repos_list_model.notify_data_set_changed();
+                if (local_repos.size == 0) downloaded.visible = false;
+            });
+
+            dialog.present(this);
         }
 
         [GtkCallback]

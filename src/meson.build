@@ -25,7 +25,10 @@ gitlink_sources = [
   'vala-ui/SetupPage.vala',
   'vala-ui/InvigilatorPage.vala',
   'vala-ui/ValueValidator.vala',
-  'vala-ui/PreferencesDialog.vala'
+  'vala-ui/PreferencesDialog.vala',
+  'vala-ui/RepoDetailsDialog.vala',
+  'vala-ui/RepoRemoveAlert.vala',
+  'vala-helper/ProcessManager.vala',
 ]
 
 gitlink_deps = [
@@ -35,6 +38,7 @@ gitlink_deps = [
   dependency('json-glib-1.0'),
   dependency('libsoup-3.0'),
   dependency('libportal-gtk4'),
+# dependency('libgit2-glib-1.0'),
   meson.get_compiler('vala').find_library('posix'),
   meson.get_compiler('vala').find_library('linux'),
   dependency('libadwaita-1', version: '>= 1.2'),
@@ -56,6 +60,8 @@ blueprints_src = [
     'invigilator_page.blp',
     'preferences_dialog.blp',
     'value_validator.blp',
+    'repo_details_dialog.blp',
+    'repo_remove_alert.blp',
 ]
 
 blueprints_ui = []

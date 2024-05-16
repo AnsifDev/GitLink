@@ -33,7 +33,7 @@ namespace Gitlink {
 
         public DevListModel(Gee.ArrayList<Connection.Client> data) {
             this.data = data;
-            initialize ();
+            //  initialize ();
         }
 
         public override Gtk.ListBoxRow create_list_box_row () {
@@ -46,7 +46,7 @@ namespace Gitlink {
             var client = data[position];
             dev_list_row.bind (client);
         }
-        public override uint get_n_items () {
+        public override int get_size () {
             return data.size;
         }
 
@@ -144,6 +144,11 @@ namespace Gitlink {
                 var row = (Adw.ActionRow) model.get_item(i);
                 row.remove_css_class("error");
             }
+        }
+        
+        [GtkCallback]
+        public void preferences() {
+            new PreferencesDialog().present(parent_window);
         }
 
         //  [GtkCallback]

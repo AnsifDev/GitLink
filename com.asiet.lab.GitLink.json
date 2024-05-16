@@ -1,7 +1,7 @@
 {
     "id" : "com.asiet.lab.GitLink",
     "runtime" : "org.gnome.Platform",
-    "runtime-version" : "master",
+    "runtime-version" : "46",
     "sdk" : "org.gnome.Sdk",
     "command" : "gitlink",
     "finish-args" : [
@@ -10,7 +10,8 @@
         "--socket=fallback-x11",
         "--socket=pulseaudio",
         "--device=dri",
-        "--socket=wayland"
+        "--socket=wayland",
+        "--socket=ssh-auth"
     ],
     "build-options" : {
         "append-path" : "/usr/lib/sdk/vala/bin",

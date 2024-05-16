@@ -11,6 +11,12 @@ template $GitlinkInvigilatorPage : Adw.NavigationPage {
     [top]
     Adw.HeaderBar {
       [end]
+      Button {
+        icon-name: "settings-symbolic";
+        clicked => $preferences();
+      }
+      
+      [end]
       Switch {
         active: bind template.hotspot_active bidirectional;
         state-set => $on_state_changed();

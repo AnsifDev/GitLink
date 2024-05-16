@@ -72,4 +72,43 @@ namespace Git {
         if (msg.status_code-200 >= 100) return null;
         return new JsonEngine().parse_string_to_hashmap(response);
     }
+
+    public async bool register_host(string hostname) throws Error {
+        var thread = new Thread<ArrayList<string>?>(null, () => {
+            var std_out = "", std_err = "";
+            var status = -1;
+
+            try { GLib.Process.spawn_command_line_sync("ssh-keyscan github.com", out std_out, out std_err, out status); }
+            catch (Error e) { print(@"ERR: $(e.message)\n"); }
+
+            Idle.add(register_host.callback);
+            if (status != 0) return null;
+        
+            var server_keys = new Gee.ArrayList<string>();
+            foreach (var line in std_out.strip().split("\n")) 
+                if (!line.has_prefix("# ")) server_keys.add(line);
+    
+            return server_keys;
+        }); yield;
+
+        var server_keys = thread.join();
+        if (server_keys == null) return false;
+
+        var file = File.new_for_path(@"$(Environment.get_home_dir())/.ssh/known_hosts");
+        var known_hosts = new Gee.ArrayList<string>();
+
+        if (file.query_exists()) {
+            var data_input = new DataInputStream(file.read());
+            for (string? key = ""; (key = data_input.read_line()) != null; known_hosts.add(key));
+        }
+
+        foreach (var key in known_hosts) server_keys.remove(key);
+        
+        if (server_keys.size > 0) {
+            var data_output = new DataOutputStream(file.append_to(GLib.FileCreateFlags.NONE));
+            data_output.write(string.joinv("\n", server_keys.to_array()).data);
+        }
+
+        return true;
+    }
 }

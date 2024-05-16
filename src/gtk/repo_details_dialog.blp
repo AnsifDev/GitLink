@@ -1,0 +1,274 @@
+using Gtk 4.0;
+using Adw 1;
+
+template $GitlinkRepoDetailsDialog: Adw.Dialog {
+  content-width: 650;
+  // content-height: 600;
+  // follows-content-size: true;
+  width-request: 200;
+  height-request: 200;
+  presentation-mode: bottom_sheet;
+
+  Adw.ToolbarView {
+    [top]
+    Adw.HeaderBar {
+      show-title: false;
+    }
+
+    content: Box {
+      orientation: vertical;
+      margin-bottom: 24;
+      margin-start: 24;
+      margin-end: 24;
+      spacing: 16;
+
+      Box {
+        orientation: horizontal;
+        spacing: 6;
+
+        Image {
+          icon-name: "folder-remote-symbolic";
+          pixel-size: 60;
+          // margin-bottom: 24;
+          margin-start: 24;
+          margin-end: 32;
+          // margin-top: 24;
+        }
+
+        Box {
+          orientation: vertical;
+          spacing: 6;
+
+          Label {
+            label: bind template.title;
+            xalign: 0;
+            styles ["title-2"]
+            ellipsize: start;
+          }
+
+          Box {
+            orientation: horizontal;
+            spacing: 8;
+            hexpand: false;
+            halign: start;
+            
+            $GitlinkDisplayCard {
+              label: bind template.private_repo;
+              focusable: false;
+            }
+            
+            $GitlinkDisplayCard {
+              label: bind template.forks;
+              focusable: false;
+            }
+            
+          }
+
+          Box {
+            margin-top: 8;
+            // margin-start: 8;
+            // margin-end: 8;
+            // margin-bottom: 8;
+            
+            halign: start;
+            orientation: horizontal;
+            spacing: 8;
+
+            Button {
+              visible: bind template.cloned inverted;
+              clicked => $clone_repo();
+              sensitive: bind template.cloning inverted;
+
+              Adw.ButtonContent {
+                label: "Clone Now";
+                icon-name: "list-add-symbolic";
+              }
+
+              tooltip-text: "Clone Repository";
+              styles ["suggested-action"]
+            }
+
+            Box {
+              styles ["linked"]
+              spacing: 2;
+              visible: bind template.cloned;
+
+              Button {
+                clicked => $open_locally();
+                styles ["suggested-action"]
+
+                Adw.ButtonContent {
+                  label: "Open";
+                  icon-name: "folder-open-symbolic";
+                }
+
+                tooltip-text: "Open Locally";
+              }
+
+              Button {
+                clicked => $open_with_locally();
+                styles ["suggested-action"]
+                icon-name: "pan-down-symbolic";
+
+                tooltip-text: "Open Locally";
+              }
+            }
+
+            Button {
+              icon-name: "upload-symbolic";
+              clicked => $upload();
+              visible: bind template.cloned;
+              sensitive: bind template.uploading inverted;
+
+              tooltip-text: "Upload";
+            }
+
+            Button {
+              icon-name: "download-symbolic";
+              clicked => $download();
+              visible: bind template.cloned;
+              sensitive: bind template.downloading inverted;
+
+              tooltip-text: "Download";
+            }
+
+            Button {
+              icon-name: "earth-symbolic";
+              clicked => $open_web();
+
+              tooltip-text: "Open In Web Browser";
+            }
+
+            Button {
+              icon-name: "user-trash-symbolic";
+              clicked => $remove_repo();
+              sensitive: bind template.wiping inverted;
+
+              tooltip-text: "Remove the Repository";
+              styles ["destructive-action"]
+            }
+          }
+        }
+      }
+
+      Adw.Bin {
+        margin-top: 16;
+        vexpand: true;
+        valign: fill;
+        styles ["card"]
+        child: Box {
+          orientation: vertical;
+          margin-bottom: 12;
+          margin-start: 12;
+          margin-end: 12;
+          margin-top: 12;
+          spacing: 8;
+
+          Label {
+            label: "Description";
+            xalign: 0;
+            styles ["title-4"]
+            visible: bind template.no_description inverted;
+          }
+
+          Label {
+            label: bind template.description;
+            xalign: 0;
+            margin-start: 8;
+            wrap: true;
+            styles ["caption"]
+            visible: bind template.no_description inverted;
+          }
+
+          Label {
+            label: "No Description";
+            vexpand: true;
+            styles ["title-3", "dim-label"]
+            visible: bind template.no_description;
+          }
+        };
+      }
+
+      ListBox {
+        selection-mode: none;
+        styles ["boxed-list"]
+
+        Adw.ActionRow {
+          title: "Cloning Repository";
+          visible: bind template.cloning;
+
+          [prefix]
+          Image {
+            icon-name: "download-symbolic";
+            margin-start: 8;
+            margin-end: 8;
+          }
+
+          [suffix]
+          Spinner {
+            spinning: true;
+            margin-start: 8;
+            margin-end: 8;
+          }
+        }
+
+        Adw.ActionRow {
+          title: "Uploading Repository";
+          visible: bind template.uploading;
+
+          [prefix]
+          Image {
+            icon-name: "update-symbolic";
+            margin-start: 8;
+            margin-end: 8;
+          }
+
+          [suffix]
+          Spinner {
+            spinning: true;
+            margin-start: 8;
+            margin-end: 8;
+          }
+        }
+
+        Adw.ActionRow {
+          title: "Downloading Repository";
+          visible: bind template.downloading;
+
+          [prefix]
+          Image {
+            icon-name: "update-symbolic";
+            margin-start: 8;
+            margin-end: 8;
+          }
+
+          [suffix]
+          Spinner {
+            spinning: true;
+            margin-start: 8;
+            margin-end: 8;
+          }
+        }
+
+        Adw.ActionRow {
+          title: "Wiping Repository";
+          visible: bind template.wiping;
+
+          [prefix]
+          Image {
+            icon-name: "update-symbolic";
+            margin-start: 8;
+            margin-end: 8;
+          }
+
+          [suffix]
+          Spinner {
+            spinning: true;
+            margin-start: 8;
+            margin-end: 8;
+          }
+        }
+      }
+    };
+  }
+}

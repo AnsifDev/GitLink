@@ -1,56 +1,94 @@
 using Gtk 4.0;
 using Adw 1;
 
-template $GitlinkRepoCloneDialog: Adw.Window {
-  default-width: 413;
-  default-height: 550;
+template $GitlinkRepoCloneDialog: Adw.Dialog {
+  content-width: 700;
+  content-height: 600;
+  // follows-content-size: true;
   width-request: 400;
   height-request: 534;
-  resizable: false;
-  title: "Clone Repositories";
+  // presentation-mode: bottom_sheet;
+  title: "My Repositories";
 
   Adw.ToolbarView {
     [top]
     Adw.HeaderBar {
       [start]
       Gtk.ToggleButton search_btn {
+        valign: center;
         icon-name: "system-search";
         tooltip-text: "Start Search";
       }
+
+      title-widget: Box {
+        valign: center;
+        orientation: vertical;
+        Revealer {
+          reveal-child: bind search_btn.active inverted;
+          Adw.WindowTitle {
+            height-request: 30;
+            valign: center;
+            // visible: bind search_btn.active inverted;
+            title: "My Repositories";
+          }
+        }
+
+        Revealer search_bar {
+          // search-mode-enabled: bind search_btn.active bidirectional;
+          // key-capture-widget: template;
+          // styles ["inline"]
+          reveal-child: bind search_btn.active;
+
+          Adw.Clamp {
+            maximum-size: 400;
+            SearchEntry acc_search_entry {
+              // visible: bind search_btn.active;
+              hexpand: true;
+              search-delay: 350;
+              activates-default: true;
+              placeholder-text: "Search Accounts";
+            }
+          }
+        }
+      };
     }
 
-    [top]
-    SearchBar search_bar {
-      search-mode-enabled: bind search_btn.active bidirectional;
-      key-capture-widget: template;
-      styles ["inline"]
-      SearchEntry acc_search_entry {
-        hexpand: true;
-        search-delay: 350;
-        activates-default: true;
-        placeholder-text: "Search Accounts";
-      }
-    }
+    // [top]
+    // SearchBar search_bar {
+    //   search-mode-enabled: bind search_btn.active bidirectional;
+    //   key-capture-widget: template;
+    //   styles ["inline"]
+    //   Adw.Clamp {
+    //     SearchEntry acc_search_entry {
+    //       hexpand: true;
+    //       search-delay: 350;
+    //       activates-default: true;
+    //       placeholder-text: "Search Accounts";
+    //     }
+    //   }
+    // }
 
     content: Gtk.ScrolledWindow {
       hscrollbar-policy: never;
 
-      Box {
-        orientation: vertical;
-        margin-bottom: 24;
-        margin-start: 24;
-        margin-end: 24;
-        margin-top: 24;
-        spacing: 40;
+      Adw.Clamp {
+        Box {
+          orientation: vertical;
+          margin-bottom: 24;
+          margin-start: 24;
+          margin-end: 24;
+          margin-top: 24;
+          spacing: 40;
 
-        Image {
-          pixel-size: 200;
-          resource: "/com/asiet/lab/GitLink/assets/repo.png";
-        }
+          Image {
+            pixel-size: 200;
+            resource: "/com/asiet/lab/GitLink/assets/repo.png";
+          }
 
-        ListBox list_box {
-          styles["boxed-list"]
-          selection-mode: none;
+          ListBox list_box {
+            styles["boxed-list"]
+            selection-mode: none;
+          }
         }
       }
     };
@@ -58,10 +96,12 @@ template $GitlinkRepoCloneDialog: Adw.Window {
     [bottom]
     Button {
       sensitive: false;
-      halign: center;
+      halign: end;
       margin-top: 8;
       margin-bottom: 8;
-      styles ["pill", "suggested-action"]
+      margin-start: 8;
+      margin-end: 8;
+      styles ["suggested-action"]
       // clicked => $create_new();
 
       Adw.ButtonContent {

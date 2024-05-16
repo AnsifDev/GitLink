@@ -1,0 +1,56 @@
+using Gtk 4.0;
+using Adw 1;
+
+template $GitlinkRepoRemoveAlert : Adw.AlertDialog {
+    heading: "Wipe Repository?";
+    extra-child: ListBox {
+        margin-top: 16;
+        margin-bottom: 16;
+        margin-start: 8;
+        margin-end: 8;
+        styles ["boxed-list"]
+        selection-mode: none;
+
+        Adw.ActionRow {
+            title: "Save Changes";
+            subtitle: "Uncommited works found. Save and sync before wipe";
+            visible: bind template.cloned;
+            // sensitive: bind template.save_permitted;
+            sensitive: false;
+            activatable-widget: save_btn;
+
+            [prefix]
+            Gtk.CheckButton save_btn {
+                styles ["selection-mode"]
+                active: bind template.save_changes bidirectional;
+            }
+        }
+
+        Adw.ActionRow {
+            title: "Remove Locally";
+            subtitle: "Wipe repository from this device only";
+            visible: bind template.cloned;
+            sensitive: bind template.local_remove_permitted;
+            activatable-widget: rm_local_btn;
+
+            [prefix]
+            Gtk.CheckButton rm_local_btn {
+                styles ["selection-mode"]
+                active: bind template.remove_locally bidirectional;
+            }
+        }
+
+        Adw.ActionRow {
+            title: "Remove Globally";
+            subtitle: "Wipe repository from GitHub";
+            activatable-widget: rm_global_btn;
+            sensitive: false;
+
+            [prefix]
+            Gtk.CheckButton rm_global_btn {
+                styles ["selection-mode"]
+                active: bind template.remove_globally bidirectional;
+            }
+        }
+    };
+}

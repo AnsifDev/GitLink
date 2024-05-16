@@ -2,7 +2,10 @@ application_id = 'com.asiet.lab.GitLink'
 
 scalable_dir = 'hicolor' / 'scalable' / 'apps'
 install_data(
-  scalable_dir / ('@0@.svg').format(application_id),
+  [
+    join_paths(scalable_dir, ('com.asiet.lab.GitLink.svg')),
+    join_paths(scalable_dir, ('com.asiet.lab.GitLink.Devel.svg'))
+  ],
   install_dir: get_option('datadir') / 'icons' / scalable_dir
 )
 
@@ -31,6 +34,10 @@ install_data(
     join_paths(symbolic_dir, ('network-server-symbolic.svg')),
     join_paths(symbolic_dir, ('edit-copy-symbolic.svg')),
     join_paths(symbolic_dir, ('user-home-symbolic.svg')),
+    join_paths(symbolic_dir, ('folder-remote-symbolic.svg')),
+    join_paths(symbolic_dir, ('upload-symbolic.svg')),
+    join_paths(symbolic_dir, ('download-symbolic.svg')),
+    join_paths(symbolic_dir, ('update-symbolic.svg')),
   ],
   install_dir: get_option('datadir') / 'icons' / symbolic_dir
 )

@@ -21,7 +21,7 @@ namespace Gitlink {
         public AccountsListModel(ArrayList<Git.User> src) { 
             data = src; 
             foreach (var item in src) filtered.add(item);
-            initialize(); 
+            //  initialize(); 
         }
     
         public void apply_search(string? text) {
@@ -49,6 +49,6 @@ namespace Gitlink {
             accounts_list_box_row.subtitle = user.username;
         }
     
-        public override uint get_n_items () { return filtered.size; }
+        public override int get_size () { return filtered.size; }
     }
 }

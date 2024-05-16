@@ -23,10 +23,14 @@ namespace Gitlink {
     public class Application : Adw.Application {
         private bool _hotspot_active = false;
         private HashMap<Client, string?> clients = new HashMap<Client, string?>();
-        public bool alarm_ringing { get; set; }
         private Bell bell;
         private VolumeMonitor monitor = VolumeMonitor.get ();
+        private GLib.Settings settings = new GLib.Settings ("com.asiet.lab.GitLink");
 
+        public ProcessManager process_manager { get; construct set; }
+        public bool alarm_ringing { get; set; }
+        public Client client { get; private set; }
+        public bool client_active { get; private set; default = false;}
         public Server server { get; private set; default = new Server (); }
         public bool hotspot_active { 
             get { return _hotspot_active; } 
@@ -38,20 +42,14 @@ namespace Gitlink {
             } 
         }
 
-        public Client client { get; private set; }
-        public bool client_active { get; private set; default = false;}
-        private GLib.Settings settings = new GLib.Settings ("com.asiet.lab.GitLink");
-
         public Application () {
             Object (application_id: "com.asiet.lab.GitLink", flags: ApplicationFlags.DEFAULT_FLAGS);
-            monitor.mount_added.connect(on_mount_added);
+            monitor.mount_added.connect((mount) => {
+                if (client_active) client.send_message ("MOUNT", mount.get_name());
+            });
         }
 
         public string get_client_name(Client client) { return clients[client]; }
-
-        private void on_mount_added(Mount mount) {
-            if (client_active) client.send_message ("MOUNT", mount.get_name());
-        }
 
         public Client[] get_connected_clients() { return clients.keys.to_array (); }
 
@@ -109,6 +107,9 @@ namespace Gitlink {
                     print("Running\n");
                 }
             });
+
+            process_manager = new ProcessManager(this);
+            //  Ggit.init();
         }
 
         public new static Application get_default() {

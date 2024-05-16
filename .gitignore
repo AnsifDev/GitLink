@@ -6,3 +6,4 @@ src.old
 test.http
 *.old
 test.*
+*.flatpak

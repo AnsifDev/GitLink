@@ -5,7 +5,7 @@ namespace Gitlink {
         public string id { get; construct set; }
         public string name { get; set; }
         public string status { get; set; }
-        public float progress { get; set; default = -1; }
+        public float progress { get; set; default = 0; }
 
         public Process(string id, string name) {  Object(id: id, name: name); }
 

@@ -31,7 +31,8 @@ namespace Gitlink {
         private void create_new() {
             creating = true;
             creatable = false;
-            run_command.begin(@"ssh-keygen -f $(Environment.get_home_dir())/.ssh/Test -N $password -t ed25519", (src, res) => {
+            var key_name = user.username;
+            run_command.begin(@"ssh-keygen -f $(Environment.get_home_dir())/.ssh/$key_name -N $password -t ed25519 -C $key_name", (src, res) => {
                 creatable = true;
                 creating = false;
                 parent_window.pop();

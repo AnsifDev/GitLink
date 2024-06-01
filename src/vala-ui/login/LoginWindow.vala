@@ -3,7 +3,7 @@ using Gee;
 
 namespace Gitlink {
     [GtkTemplate (ui = "/com/asiet/lab/GitLink/gtk/login_window.ui")]
-    public class LoginWindow : Adw.Window {
+    public class LoginWindow : Adw.Dialog {
         [GtkChild]
         private unowned Adw.NavigationView nav_view;
 
@@ -13,16 +13,17 @@ namespace Gitlink {
 
         public bool pop() { return nav_view.pop(); }
 
-        public void show_error(string description) {
-            var msg = new Adw.MessageDialog(this, "Error", description);
+        public void show_error(string description, string heading = "Error", bool close_window = true) {
+            var msg = new Adw.AlertDialog(heading, description);
             msg.add_response("ok", "OK");
-            msg.present();
+            msg.present(this);
+
+            msg.response.connect(() => {
+                if (close_window) close();
+            });
         }
         
         public LoginWindow(Window parent) {
-            transient_for = parent;
-            modal = true;
-
             push(new AuthenticationPage(this));
         }
     }

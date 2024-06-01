@@ -13,9 +13,13 @@ namespace Git {
         public string? description { get; private set; }
         public int64 forks { get; private set; }
 
+        private Ggit.Repository local_repo;
+
         internal Repository(HashMap<string, Value?> data_map) {
             id = (int64) data_map["id"];
             update_from_HashMap(data_map);
+
+            if (local_url != null) local_repo = Ggit.Repository.open(File.new_for_path(local_url));
         }
 
         public string[] list_all_files(string root_path) throws Error {
@@ -159,29 +163,192 @@ namespace Git {
             return data;
         }
 
-        public async bool upload() {
-            Posix.system(@"git -C $local_url add --all");
-            Posix.system(@"git -C $local_url commit -m \"GitLink Commit\"");
-            
-            var thread = new Thread<bool>(null, () => {
-                var status = Posix.system(@"git -C $local_url push --force");
-    
-                Idle.add(upload.callback);
-                return status == 0;
-            }); yield;
-            
-            return thread.join();
+        public string[] get_changes() throws Error {
+            var index = local_repo.get_index();
+            var status_opts = new Ggit.StatusOptions(Ggit.StatusOption.DEFAULT&~Ggit.StatusOption.INCLUDE_IGNORED, Ggit.StatusShow.WORKDIR_ONLY, null);
+            var array = new ArrayList<string>();
+            local_repo.file_status_foreach(status_opts, (path, f_status) => {
+                array.add(path);
+                return 0;
+            });
+            return array.to_array();
         }
 
-        public async bool download() {
+        public async bool upload(RepoTransferCallback transfer_cb) throws Error {
+            if (local_repo == null)
+                if (local_url == null) throw new Error(GLib.Quark.from_string("NOT_LOCAL_REPO"), 100, "Repository is not downloaded yet. Please download the repository and try again");
+                else local_repo = Ggit.Repository.open(File.new_for_path(local_url));
+            
+            // Index retrived
+            var index = local_repo.get_index(); 
+	
+            // Scaning working directory for changes
+	        var status_opts = new Ggit.StatusOptions(Ggit.StatusOption.DEFAULT&~Ggit.StatusOption.INCLUDE_IGNORED, Ggit.StatusShow.WORKDIR_ONLY, null);
+            local_repo.file_status_foreach(status_opts, (path, f_status) => {
+                
+                // Staging changes
+                if ((f_status & Ggit.StatusFlags.WORKING_TREE_DELETED) != 0) 
+                    index.remove(GLib.File.new_for_path(@"$local_url/$path"), 0);
+                else index.add_path(path);
+                return 0;
+            });
+            index.write();
+
+            // Generating a tree for commit
+            var tree_id = index.write_tree();
+            var tree = local_repo.lookup_tree(tree_id);
+            
+            // Obtaining parent of new commit
+            var head = local_repo.head;
+            var target = head != null ? head.get_target(): null;
+            var target_commit = target != null ? local_repo.lookup_commit(target): null;
+            
+            // Generating commit parents array
+            Ggit.Commit[] parents;
+            if (target_commit != null) parents = { target_commit };
+            else parents = {};
+
+            // Retriving commit author details and generating a signature
+            var configs = local_repo.get_config();
+            var author_name = configs.get_entry("user.name").get_value();
+            var author_email = configs.get_entry("user.email").get_value();
+            var author = new Ggit.Signature.now(author_name, author_email);
+
+            // Commiting the changes
+            var commit = local_repo.create_commit("HEAD", author, author, null, "Commit Test", tree, parents);
+
+            var c_branch = head as Ggit.Branch;
+
+            // Setting up Feedback mechanism on data transfer
+            var remote_cb = new RemoteCallbacks();
+            var status = "";
+            var progress = 0f;
+            var running = true;
+            remote_cb.progress.connect((msg) => { if (msg.strip().length > 0) status = msg.strip().escape(); });
+            remote_cb.transfer_progress.connect((stats) => { status = "Downloading..."; progress = (float) stats.get_received_objects()/stats.get_total_objects(); } );
+
+            if (transfer_cb != null) Timeout.add(200, () => { if (running) transfer_cb(status, progress); return running; });
+
+            // Preparing the configurations for a push operation
+            var push_opts = new Ggit.PushOptions();
+            push_opts.callbacks = remote_cb;
+            push_opts.parallelism = 4;
+            
+            // Threading a push operation
             var thread = new Thread<bool>(null, () => {
-                var status = Posix.system(@"git -C $local_url pull --force");
-    
-                Idle.add(download.callback);
-                return status == 0;
+                var sucess = true;
+                Ggit.Remote? remote = null;
+                try {
+                    // Connecting with server for a data transfer
+                    remote = local_repo.lookup_remote("origin");
+                    remote.connect(Ggit.Direction.PUSH, remote_cb, null, null);
+
+                    // Running a force push
+                    remote.push({ @"+$(head.get_name())" }, push_opts);
+                    remote.update_tips(remote_cb, false, Ggit.RemoteDownloadTagsType.NONE, "pull");
+                } catch (Error e) { printerr("ERR: %s\n", e.message); sucess = false; }
+
+                if (remote != null) remote.disconnect();
+                
+                Idle.add(upload.callback);
+                return sucess;
             }); yield;
             
-            return thread.join();
+            running = false;
+            if (!thread.join()) return false;
+
+            // Updating the upstream of the branch
+            c_branch.set_upstream(@"origin/$(c_branch.get_name())");
+            
+            return true;
+        }
+
+        //  public async bool upload() {
+        //      Posix.system(@"git -C $local_url add --all");
+        //      Posix.system(@"git -C $local_url commit -m \"GitLink Commit\"");
+            
+        //      var thread = new Thread<bool>(null, () => {
+        //          var status = Posix.system(@"git -C $local_url push --force");
+    
+        //          Idle.add(upload.callback);
+        //          return status == 0;
+        //      }); yield;
+            
+        //      return thread.join();
+        //  }
+
+        //  public async bool download() {
+        //      var thread = new Thread<bool>(null, () => {
+        //          var status = Posix.system(@"git -C $local_url pull --force");
+    
+        //          Idle.add(download.callback);
+        //          return status == 0;
+        //      }); yield;
+            
+        //      return thread.join();
+        //  }
+
+        public async bool download(RepoTransferCallback transfer_cb) throws Error {
+            var head = local_repo.head;
+
+            // Seting up feedback mechanism on data transfer
+            var remote_cb = new RemoteCallbacks();
+            var status = "";
+            var progress = 0f;
+            var running = true;
+            remote_cb.progress.connect((msg) => { if (msg.strip().length > 0) status = msg.strip().escape(); });
+            remote_cb.transfer_progress.connect((stats) => { status = "Downloading..."; progress = (float) stats.get_received_objects()/stats.get_total_objects(); } );
+
+            if (transfer_cb != null) Timeout.add(200, () => { if (running) transfer_cb(status, progress); return running; });
+        
+            // Configuring a fetch
+            var fetch_opts = new Ggit.FetchOptions();
+            fetch_opts.set_remote_callbacks(remote_cb);
+            fetch_opts.set_download_tags(Ggit.RemoteDownloadTagsType.NONE);
+
+            // Threading a fetch
+            var thread = new Thread<bool>(null, () => {
+                var sucess = true;
+
+                try {
+                    // Connecting to server
+                    var remote = local_repo.lookup_remote("origin");
+                    remote.connect(Ggit.Direction.FETCH, remote_cb, null, null);
+                    
+                    // Fetching
+                    remote.download(null, fetch_opts);
+                    
+                    // Extracting data and updating remote branches
+                    remote.update_tips(remote_cb, false, Ggit.RemoteDownloadTagsType.NONE, "pull");
+                    remote.prune(remote_cb);
+
+                    // Disconnection from server
+                    remote.disconnect();
+                } catch (Error e) { printerr("%s", e.message); sucess = false; }
+                
+                return sucess;
+            }); yield;
+
+            running = false;
+            if (!thread.join()) return false;
+
+            var c_branch = head as Ggit.Branch;
+
+            // Retriving checkout parameters
+            var upstream = c_branch.get_upstream();
+            var upstream_target = upstream.get_target();
+            var upstream_commit = local_repo.lookup_commit(upstream_target);
+            var upstream_tree = upstream_commit.get_tree();
+        
+            // Configuring a checkout & applying changes
+            var checkout_opts = new Ggit.CheckoutOptions();
+            checkout_opts.set_strategy(Ggit.CheckoutStrategy.SAFE);
+            local_repo.checkout_tree(upstream_tree, checkout_opts);
+        
+            // Updating head
+            head.set_target(upstream_target, "pull");
+            
+            return true;
         }
 
         public void wipe() {
@@ -200,63 +367,78 @@ namespace Git {
             local_url = null;
         }
 
-        public async bool clone() {
+        //  public async bool clone() {
+        //      var url = ssh_url.replace("git@github.com", @"git@$owner.github.com");
+        //      var path = @"$(Environment.get_home_dir())/$full_name";
+        //      var client = Client.get_default();
+        //      var user = yield client.load_user(owner);
+
+        //      var thread = new Thread<bool>  (null, () => {
+        //          var rt = Posix.system(@"git clone $url $path");
+
+        //          Idle.add(clone.callback);
+        //          return rt == 0;
+        //      }); yield;
+
+        //      if (!thread.join()) return false;
+
+        //      Posix.system(@"git -C $path config user.name \"$(user.name)\"");
+        //      Posix.system(@"git -C $path config user.email \"$(user.email)\"");
+
+        //      local_url = path;
+        //      user.local_repos.add(id);
+
+        //      return true;
+        //  }
+
+        public delegate void RepoTransferCallback (string status, float progress);
+
+        public async bool clone(RepoTransferCallback transfer_cb) throws Error {
             var url = ssh_url.replace("git@github.com", @"git@$owner.github.com");
             var path = @"$(Environment.get_home_dir())/$full_name";
             var client = Client.get_default();
             var user = yield client.load_user(owner);
 
-            var thread = new Thread<bool>  (null, () => {
-                var rt = Posix.system(@"git clone $url $path");
+            Posix.system (@"rm -fr $path");
 
+            var remote_cb = new RemoteCallbacks();
+            var status = "";
+            var progress = 0f;
+            var running = true;
+            remote_cb.progress.connect((msg) => { if (msg.strip().length > 0) status = msg.strip().escape(); });
+            remote_cb.transfer_progress.connect((stats) => { status = "Downloading..."; progress = (float) stats.get_received_objects()/stats.get_total_objects(); } );
+            //  remote_cb.completion.connect(() => { running = false; });
+
+            if (transfer_cb != null) Timeout.add(200, () => { if (running) transfer_cb(status, progress); return running; });
+
+            var fetch_opts = new Ggit.FetchOptions();
+            fetch_opts.set_remote_callbacks(remote_cb);
+
+            var clone_opts = new Ggit.CloneOptions();
+            clone_opts.set_fetch_options(fetch_opts);
+
+            var thread = new Thread<Ggit.Repository>(null, () => {
+                Ggit.Repository repo = null;
+                try { repo = Ggit.Repository.clone(url, File.new_for_path(path), clone_opts); }
+                catch (Error e) {}
                 Idle.add(clone.callback);
-                return rt == 0;
+                return repo;
             }); yield;
 
-            if (!thread.join()) return false;
+            running = false;
+            if (transfer_cb != null) transfer_cb("Downloading... [OK]", progress);
 
-            Posix.system(@"git -C $path config user.name \"$(user.name)\"");
-            Posix.system(@"git -C $path config user.email \"$(user.email)\"");
+            local_repo = thread.join();
+            if (local_repo == null) return false;
+
+            var configs = local_repo.get_config();
+            configs.set_string("user.name", user.name);
+            configs.set_string("user.email", user.email);
 
             local_url = path;
             user.local_repos.add(id);
-
-            return true;
-        }
-
-        //  public async bool clone_repo2(Ggit.RemoteCallbacks callbacks) {
-        //      var url = ssh_url.replace("git@github.com", @"git@$owner.github.com");
-        //      var path = @"$(Environment.get_home_dir())/$full_name";
-        //      print(@"Cloning: from $url to $path\n");
-
-        //      var fetch_options = new Ggit.FetchOptions();
-        //      fetch_options.set_remote_callbacks(callbacks);
-
-        //      var clone_options = new Ggit.CloneOptions();
-        //      clone_options.set_fetch_options(fetch_options);
-
-        //      var thread = new Thread<Ggit.Repository?>  (null, () => {
-        //          try {
-        //              var repo = Ggit.Repository.clone(url, GLib.File.new_for_path(path), clone_options);
-        //              Idle.add(clone_repo2.callback);
-        //              return repo;
-        //          } catch (Error e) { print(@"ERR: $(e.message)\n"); }
-        
-        //          Idle.add(clone_repo2.callback);
-        //          return null;
-        //      }); yield;
-
-        //      if (thread.join() == null) return false;
-
-        //      local_url = path;
-
-        //      var client = Client.get_default();
-        //      var user = yield client.load_user(owner);
-        //      user.local_repos.add(id);
-
-        //      return true;
-
             
-        //  } 
+            return true;
+        } 
     }
 }

@@ -11,7 +11,8 @@
         "--socket=pulseaudio",
         "--device=dri",
         "--socket=wayland",
-        "--socket=ssh-auth"
+        "--socket=ssh-auth",
+        "--filesystem=host"
     ],
     "build-options" : {
         "append-path" : "/usr/lib/sdk/vala/bin",
@@ -54,6 +55,35 @@
                     "type": "git",
                     "url": "https://github.com/flatpak/libportal.git",
                     "tag": "0.7.1"
+                }
+            ]
+        },
+        {
+            "name": "libgit2",
+            "buildsystem": "cmake-ninja",
+            "config-opts": [
+                "-DUSE_SSH=exec",
+                "-DCMAKE_BUILD_TYPE=Release"
+            ],
+            "sources": [
+                {
+                    "type": "git",
+                    "url": "https://github.com/libgit2/libgit2.git",
+                    "tag": "v1.8.1"
+                }
+            ]
+        },
+        {
+            "name": "libgit2-glib",
+            "buildsystem": "meson",
+            "config-opts": [
+                "-Dssh=false"
+            ],
+            "sources": [
+                {
+                    "type": "git",
+                    "url": "https://github.com/AnsifDev/Libgit2-glib.git",
+                    "branch": "master"
                 }
             ]
         },

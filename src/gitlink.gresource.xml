@@ -2,6 +2,7 @@
 <gresources>
   <gresource prefix="/com/asiet/lab/GitLink">
     <file>style.css</file>
+    <file>style-dark.css</file>
     <file>gtk/window.ui</file>
     <file>gtk/user_page.ui</file>
     <file>gtk/display_card.ui</file>

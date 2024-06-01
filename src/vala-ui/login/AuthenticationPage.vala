@@ -34,7 +34,9 @@ namespace Gitlink {
 
                     btn_authorize.sensitive = true;
                     auth_label = "Authorize";
-                } catch (Error e) { print(e.message); }
+                } catch (Error e) {
+                    parent_window.show_error(e.message);
+                }
             });
         }
 
@@ -60,7 +62,7 @@ namespace Gitlink {
         [GtkCallback]
         private void authorize() {
             var launcher = new UriLauncher("https://github.com/login/device");
-            launcher.launch.begin(parent_window, null);
+            launcher.launch.begin(Application.get_default().active_window, null);
             if (!polling) {
                 polling = true;
                 authenticate.begin((src, res) => {
@@ -69,9 +71,7 @@ namespace Gitlink {
 
                         parent_window.push(new UserConfigPage(parent_window, user));
                     } catch (Error e) {
-                        var msg = new Adw.MessageDialog(parent_window, "Something Wrong", "Login Failed due some unexpected error");
-                        msg.add_response("ok", "OK");
-                        msg.present();
+                        parent_window.show_error("Login Failed due some unexpected error");
                     }
                 });
             }

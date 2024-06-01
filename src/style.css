@@ -2,3 +2,8 @@
     border: 1px solid @borders;
     border-radius: 5px;
 }
+
+.focusable:focus {
+    /* border: 2px solid #78aeed; */
+    border: 2px solid #1c71d877;
+}

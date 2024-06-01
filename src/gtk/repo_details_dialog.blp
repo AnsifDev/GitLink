@@ -189,85 +189,130 @@ template $GitlinkRepoDetailsDialog: Adw.Dialog {
         };
       }
 
-      ListBox {
+      // ListBox {
+      //   selection-mode: none;
+      //   styles ["boxed-list"]
+
+      //   Adw.ActionRow {
+      //     title: "Cloning Repository";
+      //     subtitle: bind template.cloning_status;
+      //     visible: bind template.cloning;
+      //     title-lines: 1;
+      //     subtitle-lines: 1;
+      //     // visible: true;
+
+      //     [prefix]
+      //     Image {
+      //       icon-name: "download-symbolic";
+      //       margin-start: 8;
+      //       margin-end: 8;
+      //     }
+
+      //     // [suffix]
+      //     // Spinner {
+      //     //   spinning: true;
+      //     //   margin-start: 8;
+      //     //   margin-end: 8;
+      //     // }
+
+      //     [suffix]
+      //     Gtk.ProgressBar {
+      //       fraction: bind template.cloning_progress;
+      //       margin-start: 8;
+      //       margin-end: 8;
+      //       valign: center;
+      //       halign: center;
+      //       hexpand: false;
+      //     }
+      //   }
+
+      //   Adw.ActionRow {
+      //     title: "Uploading Repository";
+      //     subtitle: bind template.uploading_status;
+      //     visible: bind template.uploading;
+      //     title-lines: 1;
+      //     subtitle-lines: 1;
+
+      //     [prefix]
+      //     Image {
+      //       icon-name: "update-symbolic";
+      //       margin-start: 8;
+      //       margin-end: 8;
+      //     }
+
+      //     // [suffix]
+      //     // Spinner {
+      //     //   spinning: true;
+      //     //   margin-start: 8;
+      //     //   margin-end: 8;
+      //     // }
+
+      //     [suffix]
+      //     Gtk.ProgressBar {
+      //       fraction: bind template.uploading_progress;
+      //       margin-start: 8;
+      //       margin-end: 8;
+      //       valign: center;
+      //       halign: center;
+      //       hexpand: false;
+      //     }
+      //   }
+
+      //   Adw.ActionRow {
+      //     title: "Downloading Repository";
+      //     subtitle: bind template.downloading_status;
+      //     visible: bind template.downloading;
+      //     title-lines: 1;
+      //     subtitle-lines: 1;
+
+      //     [prefix]
+      //     Image {
+      //       icon-name: "update-symbolic";
+      //       margin-start: 8;
+      //       margin-end: 8;
+      //     }
+
+      //     // [suffix]
+      //     // Spinner {
+      //     //   spinning: true;
+      //     //   margin-start: 8;
+      //     //   margin-end: 8;
+      //     // }
+
+      //     [suffix]
+      //     Gtk.ProgressBar {
+      //       fraction: bind template.uploading_progress;
+      //       margin-start: 8;
+      //       margin-end: 8;
+      //       valign: center;
+      //       halign: center;
+      //       hexpand: false;
+      //     }
+      //   }
+
+      //   Adw.ActionRow {
+      //     title: "Wiping Repository";
+      //     visible: bind template.wiping;
+
+      //     [prefix]
+      //     Image {
+      //       icon-name: "update-symbolic";
+      //       margin-start: 8;
+      //       margin-end: 8;
+      //     }
+
+      //     [suffix]
+      //     Spinner {
+      //       spinning: true;
+      //       margin-start: 8;
+      //       margin-end: 8;
+      //     }
+      //   }
+      // }
+
+      ListBox process_listbox {
         selection-mode: none;
         styles ["boxed-list"]
-
-        Adw.ActionRow {
-          title: "Cloning Repository";
-          visible: bind template.cloning;
-
-          [prefix]
-          Image {
-            icon-name: "download-symbolic";
-            margin-start: 8;
-            margin-end: 8;
-          }
-
-          [suffix]
-          Spinner {
-            spinning: true;
-            margin-start: 8;
-            margin-end: 8;
-          }
-        }
-
-        Adw.ActionRow {
-          title: "Uploading Repository";
-          visible: bind template.uploading;
-
-          [prefix]
-          Image {
-            icon-name: "update-symbolic";
-            margin-start: 8;
-            margin-end: 8;
-          }
-
-          [suffix]
-          Spinner {
-            spinning: true;
-            margin-start: 8;
-            margin-end: 8;
-          }
-        }
-
-        Adw.ActionRow {
-          title: "Downloading Repository";
-          visible: bind template.downloading;
-
-          [prefix]
-          Image {
-            icon-name: "update-symbolic";
-            margin-start: 8;
-            margin-end: 8;
-          }
-
-          [suffix]
-          Spinner {
-            spinning: true;
-            margin-start: 8;
-            margin-end: 8;
-          }
-        }
-
-        Adw.ActionRow {
-          title: "Wiping Repository";
-          visible: bind template.wiping;
-
-          [prefix]
-          Image {
-            icon-name: "update-symbolic";
-            margin-start: 8;
-            margin-end: 8;
-          }
-
-          [suffix]
-          Spinner {
-            spinning: true;
-            margin-start: 8;
-            margin-end: 8;
-          }
-        }
       }
     };
   }

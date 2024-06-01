@@ -26,8 +26,8 @@ namespace Gitlink {
 
             var go_img = new Gtk.Image.from_icon_name ("right-large-symbolic");
             go_img.margin_start = go_img.margin_end = 12;
-            bind_property("configured", go_img, "visible", GLib.BindingFlags.SYNC_CREATE, null, null);
-            bind_property("configuring", go_img, "visible", GLib.BindingFlags.INVERT_BOOLEAN, null, null);
+            bind_property("configured", go_img, "visible", GLib.BindingFlags.SYNC_CREATE, (s, in_val, ref out_val) => (out_val = in_val.get_boolean() && !configuring).get_boolean() || true, null);
+            bind_property("configuring", go_img, "visible", GLib.BindingFlags.SYNC_CREATE, (s, in_val, ref out_val) => (out_val = in_val.get_boolean() && !configuring).get_boolean() || true, null);
             add_suffix (go_img);
 
             var warning_btn = new Gtk.Button.from_icon_name ("warning-symbolic");
@@ -36,12 +36,13 @@ namespace Gitlink {
             warning_btn.valign = Align.CENTER;
             warning_btn.tooltip_text = "Your Account doesn't have the Public Key of this Key";
             warning_btn.margin_start = warning_btn.margin_end = 3;
-            bind_property("configured", warning_btn, "visible", GLib.BindingFlags.SYNC_CREATE|GLib.BindingFlags.INVERT_BOOLEAN, null, null);
-            bind_property("configuring", warning_btn, "visible", GLib.BindingFlags.INVERT_BOOLEAN, null, null);
+            bind_property("configured", warning_btn, "visible", GLib.BindingFlags.SYNC_CREATE, (s, in_val, ref out_val) => (out_val = !configured && !in_val.get_boolean()).get_boolean() || true, null);
+            bind_property("configuring", warning_btn, "visible", GLib.BindingFlags.SYNC_CREATE, (s, in_val, ref out_val) => (out_val = !configured && !in_val.get_boolean()).get_boolean() || true, null);
             warning_btn.clicked.connect (() => {
-                var msg = new Adw.MessageDialog(parent_window, "Missing Public Key", warning_btn.tooltip_text);
-                msg.add_response("ok", "OK");
-                msg.present();
+                //  var msg = new Adw.AlertDialog("Missing Public Key", warning_btn.tooltip_text);
+                //  msg.add_response("ok", "OK");
+                //  msg.present(this);
+                parent_window.show_error(warning_btn.tooltip_text, "Missing Public Key", false);
             });
             add_suffix (warning_btn);
 
@@ -127,7 +128,7 @@ namespace Gitlink {
 
                 if (configured) configure_key_locally(local_path);
                 else {
-                    var msg = new Adw.MessageDialog(parent_window, "Missing Public Key", "Your Account is missing this Key's Public Key. Please upload before proceeding");
+                    var msg = new Adw.AlertDialog("Missing Public Key", "Your Account is missing this Key's Public Key. Please upload before proceeding");
                     msg.add_response("cancel", "Cancel");
                     msg.add_response("ok", "Configure Now");
                     msg.set_response_appearance("ok", Adw.ResponseAppearance.SUGGESTED);
@@ -137,36 +138,43 @@ namespace Gitlink {
 
                             var file = File.new_for_path(@"$(key_list_row.title).pub");
                             var data_input = new DataInputStream(file.read());
-                            var contents = data_input.read_line().split(" ");
+                            var key = data_input.read_line();
+                            var contents = key.split(" ");
                             var pubkey = contents[1];
                             var algo = contents[0];
+                            var settings = new GLib.Settings("com.asiet.lab.GitLink");
+                            var key_name = settings.get_string("dev-name");
+                            if (settings.get_string("app-mode") == "lab-system") key_name = @"$(settings.get_string("lab-name"))-$key_name";
 
                             var body = new HashMap<string, Value?> ();
-                            body["key"] = @"$algo $pubkey";
-                            body["title"] = "TestKeyGitLink";
+                            body["key"] = key;
+                            body["title"] = key_name;
                             Git.post_request.begin("user/keys", body, user, (src, res) => {
                                 key_list_row.configuring = false;
                                 var response = Git.post_request.end(res);
-                                var resp_map = new JsonEngine ().parse_string_to_hashmap (response);
-                                user.remote_ssh_keys.add(resp_map);
                                 
                                 if (response == null) {
-                                    var msg2 = new Adw.MessageDialog(parent_window, "Key Upload Failed", "Unable to upload key to your account. Please try again later or try different key");
-                                    msg2.add_response("ok", "OK");
-                                    msg2.present();
-                                } else configure_key_locally(local_path);
+                                    //  var msg2 = new Adw.AlertDialog("Key Upload Failed", "Unable to upload key to your account. Please try again later or try different key");
+                                    //  msg2.add_response("ok", "OK");
+                                    //  msg2.present();
+                                    parent_window.show_error("Unable to upload key to your account. Please try again later or try different key", "Key Upload Failed", false);
+                                } else {
+                                    var resp_map = new JsonEngine ().parse_string_to_hashmap (response);
+                                    user.remote_ssh_keys.add(resp_map);
+                                    configure_key_locally(local_path);
+                                }
                             });
                         }
                     });
-                    msg.present();
+                    msg.present(parent_window);
                 }
             });
         }
 
         private void configure_key_locally(string local_path) {
             if (!ssh_config.has_key(@"$(user.username).github.com")) 
-                ssh_config[@"$(user.username).github.com"] = new HostConfiguration.for_github(@"$(user.username).github.com");
-            ssh_config[@"$(user.username).github.com"]["IdentityFile"] = local_path;
+                ssh_config[@"$(user.username).github.com"] = new HostConfiguration.for_github(@"$(user.username).github.com", local_path);
+            //  ssh_config[@"$(user.username).github.com"]["IdentityFile"] = local_path;
 
             ssh_config.save();
             parent_window.pop();

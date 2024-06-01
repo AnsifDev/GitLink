@@ -10,6 +10,11 @@ namespace Gitlink {
             bind_property("title", avatar, "text", GLib.BindingFlags.SYNC_CREATE);
 
             add_prefix(avatar);
+            add_css_class("card");
+            margin_top = margin_bottom = 4;
+            //  focusable = true;
+
+            add_css_class("focusable");
         }
     }
 

@@ -57,6 +57,7 @@ namespace Gitlink {
             this["HostName"] = "github.com";
             this["User"] = "git";
             if (identity_file != null) this["IdentityFile"] = identity_file;
+            if (identity_file != null) this["IdentitiesOnly"] = "yes";
         }
 
         public string to_string() {

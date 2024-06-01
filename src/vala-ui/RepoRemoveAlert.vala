@@ -44,7 +44,25 @@ namespace Gitlink {
 
         private async void wipe() {
             if (cloned) {
-                if (save_changes) yield repo.upload ();
+                if (save_changes) {
+                    var process_mgr = Application.get_default().process_manager;
+
+                    var process = new Process(@"$(repo.id)-updload", @"Uploading Repository: $(repo.full_name)");
+                    process_mgr.add(process);
+
+                    if (!yield repo.upload((status, progress) => {
+                        print("[UPLOAD] %s\n", status);
+                        process.status = status == "Uploading..."? status: "Preparing...";
+                        process.progress = progress;
+                    })) {
+                        var dg = new Adw.AlertDialog("Upload Failed", "Due to unexpected errors the uploading process failed. Please retry after sometime");
+                        dg.add_response("ok", "OK");
+                        dg.present(this);
+                    }
+
+                    process.completed();
+                }
+
                 repo.wipe();
             }
 

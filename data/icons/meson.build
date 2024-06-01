@@ -38,6 +38,7 @@ install_data(
     join_paths(symbolic_dir, ('upload-symbolic.svg')),
     join_paths(symbolic_dir, ('download-symbolic.svg')),
     join_paths(symbolic_dir, ('update-symbolic.svg')),
+    join_paths(symbolic_dir, ('check-round-outline2-symbolic.svg')),
   ],
   install_dir: get_option('datadir') / 'icons' / symbolic_dir
 )

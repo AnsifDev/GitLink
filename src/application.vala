@@ -109,7 +109,7 @@ namespace Gitlink {
             });
 
             process_manager = new ProcessManager(this);
-            //  Ggit.init();
+            Ggit.init();
         }
 
         public new static Application get_default() {

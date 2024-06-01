@@ -42,7 +42,9 @@ namespace Gitlink {
             empty_accounts = local_users.size == 0;
             var allow_multi_user = settings.get_boolean("allow-multiple-users");
             if (model.get_n_items () > 0) {
-                list_box.select_row (model.get_item (0) as ListBoxRow);
+                //  list_box.select_row (model.get_item (0) as ListBoxRow);
+                var row = model.get_item (0) as ListBoxRow;
+                row.grab_focus();
                 if (!app_mode_lab && !allow_multi_user) parent_window.nav_view.push(new UserPage(parent_window, local_users[0]));
             }
             
@@ -67,9 +69,10 @@ namespace Gitlink {
             var login = new LoginWindow(parent_window);
             login.authenticated.connect((user) => { 
                 local_users.add(user);
+                Git.Client.get_default().set_as_local_user(user);
                 parent_window.nav_view.push(new UserPage(parent_window, user)); 
             });
-            login.present();
+            login.present(this);
         }
         
         [GtkCallback]

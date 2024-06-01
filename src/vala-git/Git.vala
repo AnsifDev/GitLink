@@ -23,7 +23,7 @@ namespace Git {
     public async string? post_request(string end_point, HashMap<string, Value?>? body, User? user) throws Error {
         print(@"Processing POST Request $end_point\n");
         var url = "https://"+(user == null || user.token == null? @"$id:$secret@": "")+@"api.github.com/$end_point";
-        var body_str = """{"key":"ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIA9vwWOhLAhvG5JnVmCJYTc7MUOTCbrS8s548qu66Ewg","title":"TestKeyGitLink"}""";
+        var body_str = new JsonEngine().parse_hashmap_to_string(body);
 
         var msg = new Soup.Message("POST", url);
         msg.request_headers.append("Accept", "application/vnd.github+json");

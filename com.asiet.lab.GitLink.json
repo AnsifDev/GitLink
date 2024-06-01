@@ -1,7 +1,7 @@
 {
     "id" : "com.asiet.lab.GitLink",
     "runtime" : "org.gnome.Platform",
-    "runtime-version" : "46",
+    "runtime-version" : "master",
     "sdk" : "org.gnome.Sdk",
     "command" : "gitlink",
     "finish-args" : [
@@ -14,9 +14,13 @@
         "--socket=ssh-auth",
         "--filesystem=host"
     ],
+    "sdk-extensions": [
+        "org.freedesktop.Sdk.Extension.vala",
+        "org.freedesktop.Sdk.Extension.blueprint"
+    ],
     "build-options" : {
-        "append-path" : "/usr/lib/sdk/vala/bin",
-        "prepend-ld-library-path" : "/usr/lib/sdk/vala/lib"
+        "append-path" : "/usr/lib/sdk/vala/bin:/usr/lib/sdk/blueprint/bin",
+        "prepend-ld-library-path" : "/usr/lib/sdk/vala/lib:/usr/lib/sdk/blueprint/lib"
     },
     "cleanup" : [
         "/include",
@@ -31,17 +35,6 @@
         "*.a"
     ],
     "modules" : [
-        {
-            "name": "blueprint-compiler",
-            "buildsystem": "meson",
-            "sources": [
-                {
-                    "type": "git",
-                    "url": "https://gitlab.gnome.org/jwestman/blueprint-compiler",
-                    "tag": "v0.10.0"
-                }
-            ]
-        },
         {
             "name": "libportal-gtk4",
             "buildsystem": "meson",
@@ -63,7 +56,9 @@
             "buildsystem": "cmake-ninja",
             "config-opts": [
                 "-DUSE_SSH=exec",
-                "-DCMAKE_BUILD_TYPE=Release"
+                "-DCMAKE_BUILD_TYPE=Release",
+                "-DBUILD_CLI=OFF",
+                "-DBUILD_TESTS=OFF"
             ],
             "sources": [
                 {

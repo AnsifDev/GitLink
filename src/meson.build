@@ -32,6 +32,32 @@ gitlink_sources = [
   'vala-helper/ProcessManager.vala',
 ]
 
+blueprints_src = [
+    'gtk/window.blp',
+    'gtk/user_page.blp',
+    'gtk/display_card.blp',
+    'gtk/repos_row.blp',
+    'gtk/repo_clone_dialog.blp',
+    'gtk/authentication_page.blp',
+    'gtk/login_window.blp',
+    'gtk/user_config_page.blp',
+    'gtk/ssh_config_page.blp',
+    'gtk/ssh_create_page.blp',
+    'gtk/accounts_page.blp',
+    'gtk/setup_page.blp',
+    'gtk/invigilator_page.blp',
+    'gtk/preferences_dialog.blp',
+    'gtk/value_validator.blp',
+    'gtk/repo_details_dialog.blp',
+    'gtk/repo_remove_alert.blp',
+]
+
+blueprints = custom_target('blueprints',
+  input: files(blueprints_src),
+  output: '.',
+  command: [find_program('blueprint-compiler'), 'batch-compile', '@OUTDIR@', '@CURRENT_SOURCE_DIR@', '@INPUT@'],
+)
+
 gitlink_deps = [
   dependency('gtk4'),
   dependency('gee-0.8'),
@@ -45,48 +71,6 @@ gitlink_deps = [
   dependency('libadwaita-1', version: '>= 1.2'),
 ]
 
-blueprints_src = [
-    'window.blp',
-    'user_page.blp',
-    'display_card.blp',
-    'repos_row.blp',
-    'repo_clone_dialog.blp',
-    'authentication_page.blp',
-    'login_window.blp',
-    'user_config_page.blp',
-    'ssh_config_page.blp',
-    'ssh_create_page.blp',
-    'accounts_page.blp',
-    'setup_page.blp',
-    'invigilator_page.blp',
-    'preferences_dialog.blp',
-    'value_validator.blp',
-    'repo_details_dialog.blp',
-    'repo_remove_alert.blp',
-]
-
-blueprints_ui = []
-blueprints_vala = []
-blueprints_src_path = []
-foreach b : blueprints_src
-  blueprints_src_path += 'gtk/' + b
-	blueprints_ui += b.replace('.blp', '.ui')
-	blueprints_vala += b + '.vala'
-endforeach
-
-
-blueprints = custom_target('blueprints',
-  input: blueprints_src_path,
-  output: blueprints_ui,
-  command: [find_program('blueprint-compiler'), 'batch-compile', '@OUTDIR@', '@CURRENT_SOURCE_DIR@', '@INPUT@'],
-)
-
-blueprints_hack = custom_target('blueprints_hack',
-	input: blueprints,
-	output: blueprints_vala,
-	command: [find_program('touch'), '@OUTPUT@'],
-)
-
 gitlink_sources += gnome.compile_resources('gitlink-resources',
   'gitlink.gresource.xml',
   dependencies: blueprints,
@@ -95,10 +79,7 @@ gitlink_sources += gnome.compile_resources('gitlink-resources',
 
 executable('gitlink', gitlink_sources,
   dependencies: gitlink_deps,
-  vala_args: [
-  	'--target-glib=2.50',
-  	'--gresourcesdir=src/',
-  ],
+  vala_args: ['--gresourcesdir=src/'],
   install: true,
   export_dynamic: true
 )

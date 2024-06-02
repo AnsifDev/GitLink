@@ -1,13 +1,19 @@
 int main (string[] args) {
-    var server = new Gitlink.Connection.Server();
-    server.on_message_received.connect((client, action, payload) => {
-        print("%s: %s\n", action, payload);
-    });
-    server.start(3000);
-    
-    foreach (var ip in server.get_ipv4()) print("Serving on %s:3000\n", ip);
+    var mainloop = new MainLoop();
+    Gitlink.Connection.Client.connect_to_server("0.0.0.0", 3000, (src, res) => {
+        var client = Gitlink.Connection.Client.connect_to_server.end(res);
+        if (client == null) mainloop.quit ();
 
-    new MainLoop().run();
+        Timeout.add_once(1000, () => client.send_message("NAME", "S23"));
+
+        client.disconnected.connect(() => {                                
+            client = null;
+            mainloop.quit ();
+            print("Disconnected\n");
+        });
+    });
+
+    mainloop.run();
 
     return 0;
 }

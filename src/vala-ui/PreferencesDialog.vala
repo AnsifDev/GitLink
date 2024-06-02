@@ -52,18 +52,20 @@ namespace Gitlink {
 
         [GtkCallback]
         public void change_lab_name () {
-            var value_validator = new ValueValidator ("Change Lab Name", "Change the lab name which this system is placed", lab_name);
+            var value_validator = new ValueValidator ("Change Lab Name", "Change the lab name which this system is placed");
             value_validator.error = "Lab name must contain atleast 1 character";
             value_validator.on_value_changed.connect ((value) => { value_validator.valid = value.length > 0; });
+            value_validator.value = lab_name;
             value_validator.response.connect ((response) => { if (response == "confirm") lab_name = value_validator.value; });
             value_validator.present (this);
         }
 
         [GtkCallback]
         public void change_dev_name () {
-            var value_validator = new ValueValidator ("Change Device Name", "Change the device name of this system", dev_name);
+            var value_validator = new ValueValidator ("Change Device Name", "Change the device name of this system");
             value_validator.error = "Device name must contain atleast 1 character";
             value_validator.on_value_changed.connect ((value) => { value_validator.valid = value.length > 0; });
+            value_validator.value = dev_name;
             value_validator.response.connect ((response) => {
                 if (response == "confirm") {
                     dev_name = value_validator.value;
@@ -76,9 +78,10 @@ namespace Gitlink {
 
         [GtkCallback]
         public void change_host_ip () {
-            var value_validator = new ValueValidator ("Change Server IP Address", "Change the Host IP address", ip_addr);
+            var value_validator = new ValueValidator ("Change Server IP Address", "Change the Host IP address");
             value_validator.error = "Invalid IPv4 address";
             value_validator.on_value_changed.connect ((value) => { value_validator.valid = !(":" in value) && value.split(".").length == 4; });
+            value_validator.value = ip_addr;
             value_validator.response.connect ((response) => {
                 if (response == "confirm") {
                     ip_addr = value_validator.value;
@@ -109,6 +112,7 @@ namespace Gitlink {
                     var app = Application.get_default ();
                     app.disconnect_from_server ();
                     app.hotspot_active = false;
+                    foreach (var client in app.get_connected_clients ()) client.end_connection ();
                     close ();
                     app.hold();
                     app.active_window.close ();

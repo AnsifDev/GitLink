@@ -11,16 +11,8 @@ namespace Gitlink {
             set { set_response_enabled("confirm", value); }
         }
 
-        public ValueValidator(string heading, string? body, string? value) {
+        public ValueValidator(string heading, string? body) {
             Object(heading: heading, body: body);
-            if (value != null) this.value = value;
-            add_response("cancel", "Cancel");
-            add_response("confirm", "Confirm");
-            set_response_appearance("confirm", Adw.ResponseAppearance.SUGGESTED);
-            if (value != null) on_value_changed(value);
-            else set_response_enabled("confirm", false);
-            default_response = "confirm";
-            close_response = "cancel";
         }
 
         [GtkCallback]

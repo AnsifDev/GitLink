@@ -22,7 +22,7 @@ namespace Gitlink {
             app_mode_lab = settings.get_string("app-mode") == "lab-system";
 
             var app = Application.get_default();
-            if (app_mode_lab) app.connect_to_server();
+            if (app_mode_lab) app.connection_manager.connect_to_server.begin();
             app.bind_property("client_active", this, "connected", GLib.BindingFlags.SYNC_CREATE);
 
             var client = Git.Client.get_default();
@@ -53,8 +53,8 @@ namespace Gitlink {
         [GtkCallback]
         public void connect_to_server() { 
             var app = Application.get_default();
-            app.connect_to_server.begin((src, res) => {
-                var sucess = app.connect_to_server.end(res);
+            app.connection_manager.connect_to_server.begin((src, res) => {
+                var sucess = app.connection_manager.connect_to_server.end(res);
                 if (sucess) return;
 
                 var settings = new GLib.Settings("com.asiet.lab.GitLink");

@@ -70,7 +70,7 @@ namespace Gitlink {
                 if (response == "confirm") {
                     dev_name = value_validator.value;
                     var app = Application.get_default ();
-                    if (app.client != null) app.client.send_message ("NAME", dev_name);
+                    if (app.connection_manager.client != null) app.connection_manager.client.send_message ("NAME", dev_name);
                 }
             });
             value_validator.present (this);
@@ -86,9 +86,9 @@ namespace Gitlink {
                 if (response == "confirm") {
                     ip_addr = value_validator.value;
                     var app = Application.get_default ();
-                    app.disconnect_from_server ();
-                    app.connect_to_server.begin ((src, res) => {
-                        if (!app.connect_to_server.end(res)) {
+                    app.connection_manager.disconnect_from_server ();
+                    app.connection_manager.connect_to_server.begin ((src, res) => {
+                        if (!app.connection_manager.connect_to_server.end(res)) {
                             var msg = new Adw.AlertDialog("Server Connection Failed", @"Connection to the server $(settings.get_string("host-ip")) is failed. Please check the IP Address or make sure you turned the hotspot on in Server GitLink App");
                             msg.add_response("ok", "OK");
                             msg.present(this);
@@ -110,9 +110,9 @@ namespace Gitlink {
                 if (response == "ok") {
                     app_mode = "unknown";
                     var app = Application.get_default ();
-                    app.disconnect_from_server ();
-                    app.hotspot_active = false;
-                    foreach (var client in app.get_connected_clients ()) client.end_connection ();
+                    app.connection_manager.disconnect_from_server ();
+                    app.connection_manager.hotspot_active = false;
+                    foreach (var client in app.connection_manager.get_connected_clients ()) client.end_connection ();
                     close ();
                     app.hold();
                     app.active_window.close ();

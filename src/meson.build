@@ -30,6 +30,7 @@ gitlink_sources = [
   'vala-ui/RepoDetailsDialog.vala',
   'vala-ui/RepoRemoveAlert.vala',
   'vala-helper/ProcessManager.vala',
+  'vala-helper/ConnectionManager.vala',
 ]
 
 blueprints_src = [

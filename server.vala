@@ -6,6 +6,8 @@ int main (string[] args) {
 
         Timeout.add_once(1000, () => client.send_message("NAME", "S23"));
 
+        Timeout.add_once(10000, () => client.send_message("MOUNT", "Sandisk"));
+
         client.disconnected.connect(() => {                                
             client = null;
             mainloop.quit ();

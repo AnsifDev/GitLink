@@ -21,63 +21,11 @@ using Gee, Gitlink.Connection;
 
 namespace Gitlink {
     public class Application : Adw.Application {
-        private bool _hotspot_active = false;
-        private HashMap<Client, string?> clients = new HashMap<Client, string?>();
-        private Bell bell;
-        private VolumeMonitor monitor = VolumeMonitor.get ();
-        private GLib.Settings settings = new GLib.Settings ("com.asiet.lab.GitLink");
-
         public ProcessManager process_manager { get; construct set; }
-        public bool alarm_ringing { get; set; }
-        public Client client { get; private set; }
-        public bool client_active { get; private set; default = false;}
-        public Server server { get; private set; default = new Server (); }
-        public bool hotspot_active { 
-            get { return _hotspot_active; } 
-            set { 
-                if (_hotspot_active == value) return;
-                _hotspot_active = value;
-                if (value) { server.start (3000); hold(); }
-                else { server.stop(); release (); }
-            } 
-        }
+        public ConnectionManager connection_manager { get; construct set; }
 
         public Application () {
             Object (application_id: "com.asiet.lab.GitLink", flags: ApplicationFlags.DEFAULT_FLAGS);
-            monitor.mount_added.connect((mount) => {
-                if (client_active) client.send_message ("MOUNT", mount.get_name());
-            });
-        }
-
-        public string get_client_name(Client client) { return clients[client]; }
-
-        public Client[] get_connected_clients() { return clients.keys.to_array (); }
-
-        public async bool connect_to_server() {
-            if (client != null) return true;
-
-            client = yield Client.connect_to_server(settings.get_string("host-ip"), 3000);
-            if (client == null) return false;
-
-            Timeout.add_once(1000, () => client.send_message("NAME", settings.get_string("dev-name")));
-
-            client.disconnected.connect(() => {                                
-                client = null;
-                Idle.add_once(release);
-                client_active = false;
-                print("Disconnected\n");
-            });
-
-            client_active = true;
-            hold();
-            return true;
-        }
-
-        public void disconnect_from_server() {
-            if (client == null) return;
-            client.end_connection ();
-            client = null;
-            release ();
         }
 
         construct {
@@ -89,26 +37,8 @@ namespace Gitlink {
             this.add_action_entries (action_entries, this);
             this.set_accels_for_action ("app.quit", {"<primary>q"});
 
-            bell = new Bell(File.new_for_uri ("resource:///com/asiet/lab/GitLink/assets/alarm1.mp3"));
-            bind_property ("alarm_ringing", bell, "ringing", GLib.BindingFlags.BIDIRECTIONAL|GLib.BindingFlags.SYNC_CREATE);
-
-            server.connected.connect ((client) => clients[client] = null );
-            server.disconnected.connect ((client) => clients.unset (client) );
-            server.on_message_received.connect ((client, action, payload) => {
-                if (action == "NAME") clients[client] = payload;
-                if (action == "MOUNT") {
-                    var app = Application.get_default ();
-                    var dev = app.get_client_name (client);
-                    var notification = new Notification (@"Malpractice Detected");
-                    notification.set_body (@"There is an attempt to mount a files system on the device $dev");
-                    notification.set_priority (GLib.NotificationPriority.URGENT);
-                    alarm_ringing = true;
-                    app.send_notification (@"$dev-$payload", notification);
-                    print("Running\n");
-                }
-            });
-
             process_manager = new ProcessManager(this);
+            connection_manager = new ConnectionManager (this);
             Ggit.init();
         }
 

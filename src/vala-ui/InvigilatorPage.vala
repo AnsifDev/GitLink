@@ -16,7 +16,10 @@ namespace Gitlink {
 
         public void bind(Connection.Client client) {
             this.client = client;
-            var name = Gitlink.Application.get_default ().get_client_name (client);
+            var props = Gitlink.Application.get_default ().connection_manager.get_client_properties (client);
+            var name = props.name;
+            if (props.malpractice_detected) add_css_class("error");
+            else remove_css_class("error");
             title = name != null? name: client.inet_addr.to_string ();
             if (name != null) subtitle = client.inet_addr.to_string ();
         }
@@ -64,7 +67,7 @@ namespace Gitlink {
         public bool alarm_ringing { get; set; }
         public string hotspot_img { get; set; default = "/com/asiet/lab/GitLink/assets/hotspot-off.png"; }
 
-        private Connection.Server server = Application.get_default ().server;
+        private Connection.Server server = Application.get_default ().connection_manager.server;
         private ArrayList<Connection.Client> clients = new ArrayList<Connection.Client>();
         private DevListModel model;
         private Window parent_window;
@@ -72,7 +75,7 @@ namespace Gitlink {
         public InvigilatorPage(Window parent_window) {
             this.parent_window = parent_window;
 
-            Application.get_default ().bind_property("alarm_ringing", this, "alarm_ringing", GLib.BindingFlags.BIDIRECTIONAL|GLib.BindingFlags.SYNC_CREATE);
+            Application.get_default ().connection_manager.bind_property("alarm_ringing", this, "alarm_ringing", GLib.BindingFlags.BIDIRECTIONAL|GLib.BindingFlags.SYNC_CREATE);
             server.connected.connect ((client) => {
                 clients.add (client);
                 model.notify_data_set_changed ();
@@ -87,17 +90,14 @@ namespace Gitlink {
 
             server.on_message_received.connect ((client, action, payload) => {
                 if (action == "NAME") model.notify_data_set_changed ();
-                if (action == "MOUNT") {
-                    var row = (Adw.ActionRow) model.get_item(clients.index_of(client));
-                    row.add_css_class("error");
-                }
+                if (action == "MOUNT") model.notify_data_set_changed ();
                 
                 print("%s: %s\n", action, payload);
             });
 
-            Gitlink.Application.get_default ().bind_property ("hotspot_active", this, "hotspot_active", GLib.BindingFlags.BIDIRECTIONAL|GLib.BindingFlags.SYNC_CREATE, null, null);
+            Gitlink.Application.get_default ().connection_manager.bind_property ("hotspot_active", this, "hotspot_active", GLib.BindingFlags.BIDIRECTIONAL|GLib.BindingFlags.SYNC_CREATE, null, null);
 
-            foreach (var client in Gitlink.Application.get_default ().get_connected_clients())
+            foreach (var client in Gitlink.Application.get_default ().connection_manager.get_connected_clients())
                 clients.add (client);
             model = new DevListModel (clients);
             dev_list_view.bind_model (model, (widget) => (Widget) widget);
@@ -140,10 +140,12 @@ namespace Gitlink {
         [GtkCallback]
         public void stop_alarm() {
             alarm_ringing = false;
-            for (var i = 0; i < clients.size; i++) {
-                var row = (Adw.ActionRow) model.get_item(i);
-                row.remove_css_class("error");
-            }
+            var current_clients = Application.get_default().connection_manager.get_connected_clients();
+            foreach (var client in clients.to_array()) 
+                if (!(client in current_clients)) clients.remove(client);
+            
+            model.notify_data_set_changed();
+            dev_list_view.visible = clients.size != 0;
         }
         
         [GtkCallback]

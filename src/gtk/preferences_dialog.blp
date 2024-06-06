@@ -2,7 +2,7 @@ using Gtk 4.0;
 using Adw 1;
 
 template $GitlinkPreferencesDialog : Adw.PreferencesDialog {
-    search-enabled: true;
+    // search-enabled: true;
     content-height: 600;
     Adw.PreferencesPage {
         icon-name: "user-home-symbolic";
@@ -107,6 +107,33 @@ template $GitlinkPreferencesDialog : Adw.PreferencesDialog {
                     icon-name: "network-server-symbolic";
                     pixel-size: 16;
                 }
+            }
+        }
+
+        Adw.PreferencesGroup {
+            title: "App Updates";
+            description: "Self App Updating configurations. Allows you to update this app by itself";
+            header-suffix: Gtk.Button {
+                label: "Check";
+                valign: center;
+                sensitive: bind enabled.active;
+            };
+
+            Adw.SwitchRow enabled {
+                title: "Enable App Updates";
+                icon-name: "update-symbolic";
+            }
+
+            Adw.SwitchRow {
+                title: "Automatic App Updates";
+                icon-name: "update-symbolic";
+                sensitive: bind enabled.active;
+            }
+
+            Adw.SwitchRow {
+                title: "Automatic Check For Updates";
+                icon-name: "update-symbolic";
+                sensitive: bind enabled.active;
             }
         }
     }

@@ -34,6 +34,7 @@ gitlink_sources = [
 ]
 
 blueprints_src = [
+    'gtk/help-overlay.blp',
     'gtk/window.blp',
     'gtk/user_page.blp',
     'gtk/display_card.blp',
@@ -56,7 +57,7 @@ blueprints_src = [
 blueprints = custom_target('blueprints',
   input: files(blueprints_src),
   output: '.',
-  command: [find_program('blueprint-compiler'), 'batch-compile', '@OUTDIR@', '@CURRENT_SOURCE_DIR@', '@INPUT@'],
+  command: [find_program('blueprint-compiler'), 'batch-compile', '@OUTPUT@', '@CURRENT_SOURCE_DIR@', '@INPUT@'],
 )
 
 gitlink_deps = [

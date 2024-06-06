@@ -23,7 +23,7 @@ namespace Gitlink {
 
             var app = Application.get_default();
             if (app_mode_lab) app.connection_manager.connect_to_server.begin();
-            app.bind_property("client_active", this, "connected", GLib.BindingFlags.SYNC_CREATE);
+            app.connection_manager.bind_property("client_active", this, "connected", GLib.BindingFlags.SYNC_CREATE);
 
             var client = Git.Client.get_default();
             local_users = client.load_local_users();

@@ -33,7 +33,8 @@ namespace Gitlink {
         public override void shown() {
             if (ssh_config.has_key(@"$username.github.com")) {
                 ssh_key = ssh_config[@"$username.github.com"]["IdentityFile"];
-                ssh_key_ok = true;
+                if (ssh_key[0] == '~') ssh_key = ssh_key.replace("~", Environment.get_home_dir());
+                ssh_key_ok = File.new_for_path(@"$ssh_key.pub").query_exists();
             }
 
             if (user.remote_ssh_keys != null) {
@@ -52,7 +53,6 @@ namespace Gitlink {
             confirmable = user_name_ok && user_email_ok && ssh_key_ok && !ssh_key_warning;
 
             if (ssh_key_ok) {
-                if (ssh_key[0] == '~') ssh_key = ssh_key.replace("~", Environment.get_home_dir());
                 var file_reader = new DataInputStream(File.new_for_path(@"$ssh_key.pub").read());
                 var key = file_reader.read_line();
                 ssh_key_warning = true;
@@ -69,7 +69,7 @@ namespace Gitlink {
         }
         
         [GtkCallback]
-        private void show_error(Gtk.Widget src) { parent_window.show_error(src.tooltip_text); }
+        private void show_error(Gtk.Widget src) { parent_window.show_error(src.tooltip_text, "Error", false); }
 
         [GtkCallback]
         private void on_text_changed() {

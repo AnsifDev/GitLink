@@ -23,7 +23,7 @@ namespace Gitlink {
             set {
                 _repo = value;
                 title = value.name;
-                subtitle = value.private_repo? "Private Repo": "Private Repo";
+                subtitle = value.private_repo? "Private Repo": "Public Repo";
             } 
         }
 

@@ -89,7 +89,6 @@ namespace Gitlink {
         public override int get_size() {
             return data.size;
         }
-
     }
 
     [GtkTemplate (ui = "/com/asiet/lab/GitLink/gtk/repo_details_dialog.ui")]
@@ -108,6 +107,7 @@ namespace Gitlink {
         public bool uploading { get; private set; }
         public bool downloading { get; private set; }
         public bool wiping { get; private set; }
+        public bool process_running { get; private set; }
         //  public float cloning_progress { get; set; default = 0; }
         //  public float uploading_progress { get; set; default = 0; }
         //  public float downloading_progress { get; set; default = 0; }
@@ -122,7 +122,7 @@ namespace Gitlink {
 
             title = repo.full_name;
             forks = @"Forks: $(repo.forks)";
-            private_repo = repo.private_repo? "Private": "Private";
+            private_repo = repo.private_repo? "Private Repository": "Public Repository";
             cloned = repo.local_url != null;
             if (repo.description != null) description = repo.description;
             no_description = description == "";
@@ -139,7 +139,9 @@ namespace Gitlink {
             
             process_mgr.process_added.connect(process_added_cb);
 
-            process_listbox.bind_model(new ProcessModel(Application.get_default(), repo), (obj) => (Widget) obj);
+            var model = new ProcessModel(Application.get_default(), repo);
+            model.items_changed.connect(() => process_running = model.get_n_items() != 0);
+            process_listbox.bind_model(model, (obj) => (Widget) obj);
         }
 
         //  private void process_added_cb(Process src) {
@@ -171,6 +173,7 @@ namespace Gitlink {
             if (src.id == @"$(repo.id)-upload") uploading = true;
             if (src.id == @"$(repo.id)-download") downloading = true;
             if (src.id == @"$(repo.id)-wipe") wiping = true;
+            //  if (cloning || uploading || downloading || wiping) process_running = true;
             src.completed.connect(process_completed_cb);
         }
 
@@ -179,6 +182,8 @@ namespace Gitlink {
             if (src.id == @"$(repo.id)-upload") uploading = false;
             if (src.id == @"$(repo.id)-download") downloading = false;
             if (src.id == @"$(repo.id)-wipe") wiping = false;
+            //  if (!cloning && !uploading && !downloading && !wiping) 
+            //      Timeout.add(5000, () => process_running = false);
         }
 
         [GtkCallback]

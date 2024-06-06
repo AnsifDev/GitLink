@@ -47,6 +47,6 @@ namespace Gitlink {
         }
         
         [GtkCallback]
-        private void show_error(Gtk.Widget src) { parent_window.show_error(src.tooltip_text); }
+        private void show_error(Gtk.Widget src) { parent_window.show_error(src.tooltip_text, "Error", false); }
     }
 }

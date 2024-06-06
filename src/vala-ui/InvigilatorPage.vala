@@ -74,6 +74,7 @@ namespace Gitlink {
 
         public InvigilatorPage(Window parent_window) {
             this.parent_window = parent_window;
+            var app = Gitlink.Application.get_default ();
 
             Application.get_default ().connection_manager.bind_property("alarm_ringing", this, "alarm_ringing", GLib.BindingFlags.BIDIRECTIONAL|GLib.BindingFlags.SYNC_CREATE);
             server.connected.connect ((client) => {
@@ -83,6 +84,7 @@ namespace Gitlink {
             });
 
             server.disconnected.connect ((client) => {
+                if (app.connection_manager.get_client_properties(client).malpractice_detected) return;
                 clients.remove (client);
                 model.notify_data_set_changed ();
                 dev_list_view.visible = clients.size != 0;
@@ -95,9 +97,9 @@ namespace Gitlink {
                 print("%s: %s\n", action, payload);
             });
 
-            Gitlink.Application.get_default ().connection_manager.bind_property ("hotspot_active", this, "hotspot_active", GLib.BindingFlags.BIDIRECTIONAL|GLib.BindingFlags.SYNC_CREATE, null, null);
+            app.connection_manager.bind_property ("hotspot_active", this, "hotspot_active", GLib.BindingFlags.BIDIRECTIONAL|GLib.BindingFlags.SYNC_CREATE, null, null);
 
-            foreach (var client in Gitlink.Application.get_default ().connection_manager.get_connected_clients())
+            foreach (var client in app.connection_manager.get_connected_clients())
                 clients.add (client);
             model = new DevListModel (clients);
             dev_list_view.bind_model (model, (widget) => (Widget) widget);

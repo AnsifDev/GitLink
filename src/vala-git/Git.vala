@@ -53,13 +53,6 @@ namespace Git {
 
         var url = "https://github.com/login/device/code?client_id=fe459acb22155ceef1f6&scope=repo%20user%20admin:public_key";
 
-        var body = new HashMap<string, Value?>();
-        body["client_id"] = "fe459acb22155ceef1f6";
-        body["scopes"] = "repo user admin:public_key";
-
-        var body_str = new JsonEngine().parse_hashmap_to_string(body);
-        print(@"$body_str\n");
-
         var msg = new Soup.Message("POST", url);
         msg.request_headers.append("Accept", "application/vnd.github+json");
         msg.request_headers.append("User-Agent", "GitLink");
@@ -71,6 +64,40 @@ namespace Git {
         
         if (msg.status_code-200 >= 100) return null;
         return new JsonEngine().parse_string_to_hashmap(response);
+    }
+
+    public async bool revoke_token (User user) {
+        if (user.token == null) return false;
+        print(@"Processing DELETE Request token\n");
+
+        var url = @"https://api.github.com/applications/$id/token";
+
+        string encoded_token = Base64.encode(@"$id:$secret".data);
+
+        var body = new HashMap<string, Value?>();
+        body["access_token"] = user.token;
+        var body_str = new JsonEngine().parse_hashmap_to_string(body);
+        print("%s\n", body_str);
+
+        var msg = new Soup.Message("DELETE", url);
+        msg.request_headers.append("Accept", "application/vnd.github+json");
+        msg.request_headers.append("Content-Type", "application/vnd.github+json");
+        msg.request_headers.append("Authorization", @"Basic $encoded_token");
+        msg.request_headers.append("User-Agent", "GitLink");
+
+        var msg_body = new Soup.MessageBody();
+        msg_body.append_take((uint8[]) body_str.to_utf8());
+        msg.set_request_body_from_bytes("application/vnd.github+json", msg_body.flatten());
+
+        var session = new Soup.Session();
+        var response_bytes = yield session.send_and_read_async(msg, 0, null);
+        //  var response = (string) response_bytes.get_data();
+        print(@"Processing DELETE Request token\t\t[$(msg.status_code)]\n");
+        var sucess = msg.status_code-200 < 100;
+
+        if (sucess) user.token = null;
+        
+        return sucess;
     }
 
     public async bool register_host(string hostname) throws Error {

@@ -1,0 +1,47 @@
+using Gtk 4.0;
+using Adw 1;
+
+template $GitlinkLogoutDialog : Adw.AlertDialog {
+    default-response: "logout";
+    close-response: "cancel";
+
+    heading: "Logout?";
+    body: "You are going to logout from this device. Choose the actions to perform";
+
+    extra-child: ListBox {
+        styles ["boxed-list"]
+        selection-mode: none;
+
+        Adw.ActionRow {
+            title: "Logout from GitHub";
+            subtitle: "Unlink your github account from GitLink app";
+            sensitive: bind template.logout_freeze inverted;
+            activatable-widget: logout_btn;
+
+            [prefix]
+            Gtk.CheckButton logout_btn {
+                styles ["selection-mode"]
+                active: bind template.logout bidirectional;
+                toggled => $selection_changed();
+            }
+        }
+
+        Adw.ActionRow {
+            title: "Wipe Account";
+            subtitle: "Remove the account locally and wipe user data";
+            activatable-widget: wipe_btn;
+
+            [prefix]
+            Gtk.CheckButton wipe_btn {
+                styles ["selection-mode"]
+                active: bind template.wipe bidirectional;
+                toggled => $selection_changed();
+            }
+        }
+    };
+
+    responses [
+        cancel: "Cancel",
+        logout: "Logout" destructive disabled
+    ]
+}

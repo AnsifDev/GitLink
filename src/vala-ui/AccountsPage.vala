@@ -33,19 +33,30 @@ namespace Gitlink {
 
             list_box.row_activated.connect((obj, row) => {
                 //  view_account(model.get_data_for_row(row) as HashMap<string, Value?>);
-                parent_window.nav_view.push(new UserPage(parent_window, model.get_data_for_row(row)));
+                var user = model.get_data_for_row(row);
+                var user_page = new UserPage(parent_window, user);
+                user_page.logged_out.connect(() => on_logout(user));
+                parent_window.nav_view.push(user_page);
             });
+        }
+
+        private void on_logout(Git.User user) { 
+            local_users.remove(user);
+            parent_window.nav_view.pop(); 
         }
 
         public override void shown() {
             model.notify_data_set_changed();
             empty_accounts = local_users.size == 0;
             var allow_multi_user = settings.get_boolean("allow-multiple-users");
-            if (model.get_n_items () > 0) {
+            if (!empty_accounts) {
                 //  list_box.select_row (model.get_item (0) as ListBoxRow);
                 var row = model.get_item (0) as ListBoxRow;
                 row.grab_focus();
-                if (!app_mode_lab && !allow_multi_user) parent_window.nav_view.push(new UserPage(parent_window, local_users[0]));
+                var user = local_users[0];
+                var user_page = new UserPage(parent_window, local_users[0]);
+                user_page.logged_out.connect(() => on_logout(user));
+                if (!app_mode_lab && !allow_multi_user) parent_window.nav_view.push(user_page);
             }
             
         }
@@ -70,7 +81,9 @@ namespace Gitlink {
             login.authenticated.connect((user) => { 
                 local_users.add(user);
                 Git.Client.get_default().set_as_local_user(user);
-                parent_window.nav_view.push(new UserPage(parent_window, user)); 
+                var user_page = new UserPage(parent_window, user);
+                user_page.logged_out.connect(() => on_logout(user));
+                parent_window.nav_view.push(user_page); 
             });
             login.present(this);
         }

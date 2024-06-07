@@ -29,6 +29,7 @@ gitlink_sources = [
   'vala-ui/PreferencesDialog.vala',
   'vala-ui/RepoDetailsDialog.vala',
   'vala-ui/RepoRemoveAlert.vala',
+  'vala-ui/LogoutDialog.vala',
   'vala-helper/ProcessManager.vala',
   'vala-helper/ConnectionManager.vala',
 ]
@@ -52,6 +53,7 @@ blueprints_src = [
     'gtk/value_validator.blp',
     'gtk/repo_details_dialog.blp',
     'gtk/repo_remove_alert.blp',
+    'gtk/logout_dialog.blp',
 ]
 
 blueprints = custom_target('blueprints',

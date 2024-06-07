@@ -295,10 +295,34 @@ namespace Git {
             print("\t* Registering User Account\n");
             if (!user_store.has_key(uid)) user_store[uid] = new User(user_map);
             user_store[uid].token = token;
-            //  set_as_local_user(user_store[uid]);
+            set_as_local_user(user_store[uid]);
 
             print(@"Processing Request authenticate\t\t[OK]\n");
             return user_store[uid];
+        }
+
+        public void wipe_user(User user) {
+            // Removing as Local Account
+            for (var index = 0; index < local_users.size; index++) if (local_users[index].get_int64() == user.id) {
+                local_users.remove_at(index);
+                break;
+            }
+
+            // Wiping all local repositories
+            foreach (var rid in user.local_repos.to_array()) repo_store[(int) rid.get_int64()].wipe();
+
+            // Wiping cached repository datas
+            var remote_repos = user.remote_repos.to_array();
+            while (user.remote_repos.size > 0) {
+                Repository repo;
+                repo_store.unset((int) remote_repos[0].get_int64(), out repo);
+                user.remote_repos.remove_at(0);
+
+                if (repo == null) continue;
+                var file_path = @"$(Environment.get_user_data_dir())/$(repo.id)";
+                var file = File.new_for_path(file_path);
+                if (file.query_exists()) file.delete();
+            }
         }
     }
 }

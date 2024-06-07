@@ -80,6 +80,8 @@ namespace Gitlink {
 
             client.load_repositories.begin(user);
         }
+
+        public signal void logged_out();
         
         [GtkCallback]
         public void preferences() {
@@ -88,48 +90,16 @@ namespace Gitlink {
 
         [GtkCallback]
         public void logout() {
-            var logout_msg = new Adw.AlertDialog("Logout?", "You are going to logout from this device. Choose the actions to perform");
-            logout_msg.add_response("cancel", "Cancel");
-            logout_msg.add_response("ok", "Logout");
-            logout_msg.set_response_appearance("ok", Adw.ResponseAppearance.DESTRUCTIVE);
-            logout_msg.set_response_enabled("ok", user.token != null);
-            logout_msg.present(this);
-
-            var listbox = new Gtk.ListBox();
-            listbox.add_css_class("boxed-list");
-            listbox.selection_mode = Gtk.SelectionMode.NONE;
-            logout_msg.extra_child = listbox;
-
-            var online_logout_row = new Adw.ActionRow();
-            online_logout_row.title = "Logout from GitHub";
-            online_logout_row.subtitle = "Unlink your github account from GitLink app";
-            online_logout_row.sensitive = user.token != null && app_mode_lab;
-            listbox.append(online_logout_row);
-
-            var online_logout_checkbox = new Gtk.CheckButton();
-            online_logout_checkbox.add_css_class("selection-mode");
-            online_logout_checkbox.active = true;
-            online_logout_row.activatable_widget = online_logout_checkbox;
-            online_logout_row.add_prefix(online_logout_checkbox);
-
-            var local_logout_row = new Adw.ActionRow();
-            local_logout_row.title = "Logout from GitLink";
-            local_logout_row.subtitle = "Remove the account locally and wipe user data";
-            listbox.append(local_logout_row);
-
-            var local_logout_checkbox = new Gtk.CheckButton();
-            local_logout_checkbox.add_css_class("selection-mode");
-            if (!app_mode_lab) local_logout_checkbox.active = true;
-            local_logout_row.activatable_widget = local_logout_checkbox;
-            local_logout_row.add_prefix(local_logout_checkbox);
-
-            online_logout_checkbox.toggled.connect(() => {
-                logout_msg.set_response_enabled("ok", (user.token != null && online_logout_checkbox.active) || local_logout_checkbox.active);
-            });
-            local_logout_checkbox.toggled.connect(() => {
-                logout_msg.set_response_enabled("ok", (user.token != null && online_logout_checkbox.active) || local_logout_checkbox.active); 
-                if (local_logout_checkbox.active || !app_mode_lab) online_logout_checkbox.active = local_logout_checkbox.active;
-                if (app_mode_lab) online_logout_row.sensitive = !local_logout_checkbox.active;
+            var logout_dg = new LogoutDialog(user);
+            logout_dg.present(this);
+            logout_dg.response.connect((response) => {
+                if (response == "logout") {
+                    if (logout_dg.logout) Git.revoke_token(user);
+                    if (logout_dg.wipe) {
+                        Git.Client.get_default().wipe_user(user);
+                        logged_out();
+                    }
+                }
             });
         }
 

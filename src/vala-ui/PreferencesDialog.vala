@@ -35,6 +35,7 @@ namespace Gitlink {
         public string ip_addr { get; set; default = ""; }
         public string app_mode { get; set; default = ""; }
         public string app_mode_string { get; private set; default = "Loading App Mode"; }
+        public Gtk.StringList app_option_model { get; set; default = new Gtk.StringList ({ "Disabled", "Manual", "Automatic" }); }
 
         public PreferencesDialog () {
             personal_type = settings.get_string("app-mode") == "personal";

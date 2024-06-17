@@ -64,14 +64,15 @@ namespace Gitlink {
 
             dw_repo_list.row_activated.connect((row) => {
                 var repos_row = row as ReposRow;
-                var dg = new RepoDetailsDialog (repos_row.repo);
+                var repo = repos_row.repo;
+                var dg = new RepoDetailsDialog (repo);
                 dg.clone_complete.connect(() => {
-                    local_repos.add(repos_row.repo);
+                    local_repos.add(repo);
                     repos_list_model.notify_data_set_changed();
                     if (local_repos.size == 1) downloaded.visible = true;
                 });
                 dg.wipe_complete.connect(() => {
-                    local_repos.remove(repos_row.repo);
+                    local_repos.remove(repo);
                     repos_list_model.notify_data_set_changed();
                     if (local_repos.size == 0) downloaded.visible = false;
                 });

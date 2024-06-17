@@ -44,7 +44,7 @@ namespace Gitlink {
             }
             
             //Notifiying the listener about the change in size of data
-            if (size_difference != 0) items_changed(position < 0? added > 0? size-1: 0: position, removed, added);
+            if (size_difference != 0) items_changed(position < 0? added > 0? previous_size: 0: position, removed, added);
             
             if (position == -1) {
                 position = 0;

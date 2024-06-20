@@ -97,8 +97,6 @@ namespace Gitlink {
         public void disconnect_from_server() {
             if (client == null) return;
             client.end_connection ();
-            client = null;
-            app.release ();
         }
     }
 }

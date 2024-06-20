@@ -25,5 +25,13 @@
 		<key name="known-host-configured" type="b">
 			<default>false</default>
 		</key>
+		<key name="update-mode" type="s">
+			<default>'automatic'</default>
+			<choices>
+				<choice value='disabled'/>
+				<choice value='automatic'/>
+				<choice value='manual'/>
+			</choices>
+		</key>
 	</schema>
 </schemalist>

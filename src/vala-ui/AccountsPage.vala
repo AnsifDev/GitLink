@@ -79,7 +79,7 @@ namespace Gitlink {
         public void login() {
             var login = new LoginWindow(parent_window);
             login.authenticated.connect((user) => { 
-                local_users.add(user);
+                if (!(user in local_users)) local_users.add(user);
                 Git.Client.get_default().set_as_local_user(user);
                 var user_page = new UserPage(parent_window, user);
                 user_page.logged_out.connect(() => on_logout(user));

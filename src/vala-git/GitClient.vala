@@ -294,6 +294,7 @@ namespace Git {
 
             print("\t* Registering User Account\n");
             if (!user_store.has_key(uid)) user_store[uid] = new User(user_map);
+            if (user_store[uid].token != null) yield revoke_token(user_store[uid]);
             user_store[uid].token = token;
             set_as_local_user(user_store[uid]);
 

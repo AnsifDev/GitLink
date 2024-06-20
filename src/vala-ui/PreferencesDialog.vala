@@ -34,19 +34,30 @@ namespace Gitlink {
         public string lab_name { get; set; default = ""; }
         public string ip_addr { get; set; default = ""; }
         public string app_mode { get; set; default = ""; }
+        public string update_mode { get; set; default = ""; }
+        public int update_selection { get; set; default = 0; }
         public string app_mode_string { get; private set; default = "Loading App Mode"; }
-        public Gtk.StringList app_option_model { get; set; default = new Gtk.StringList ({ "Disabled", "Manual", "Automatic" }); }
 
         public PreferencesDialog () {
             personal_type = settings.get_string("app-mode") == "personal";
             lab_client_type = settings.get_string("app-mode") == "lab-system";
             lab_host_type = settings.get_string("app-mode") == "lab-host";
+            
+            var str_list = new ArrayList<string>.wrap({ "automatic", "manual", "disabled" });
+            bind_property ("update_mode", this, "update_selection", GLib.BindingFlags.BIDIRECTIONAL|GLib.BindingFlags.SYNC_CREATE, (src, from, ref to) => {
+                to = str_list.index_of (from.get_string ());
+                return true;
+            }, (src, from, ref to) => {
+                to = str_list.get (from.get_int());
+                return true;
+            });
 
             settings.bind("dev-name", this, "dev_name", GLib.SettingsBindFlags.DEFAULT);
             settings.bind("host-ip", this, "ip_addr", GLib.SettingsBindFlags.DEFAULT);
             settings.bind("lab-name", this, "lab_name", GLib.SettingsBindFlags.DEFAULT);
             settings.bind("allow-multiple-users", this, "allow_multi_user", GLib.SettingsBindFlags.DEFAULT);
             settings.bind("app-mode", this, "app_mode", GLib.SettingsBindFlags.DEFAULT);
+            settings.bind("update-mode", this, "update_mode", GLib.SettingsBindFlags.DEFAULT);
 
             app_mode_string = app_mode == "personal"? "Personal System": app_mode == "lab-system"? "Lab System": "Invigilator System";
         }

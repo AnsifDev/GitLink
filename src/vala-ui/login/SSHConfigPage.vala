@@ -184,6 +184,8 @@ namespace Gitlink {
             var path = @"$(Environment.get_home_dir ())/.ssh";
             var dir = File.new_for_path (path);
             
+            if (!dir.query_exists()) return;
+
             //Enumrator Loading
             FileEnumerator enumerator = dir.enumerate_children (
                 "standard::*",

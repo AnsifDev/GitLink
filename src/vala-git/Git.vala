@@ -127,7 +127,7 @@ namespace Git {
         if (file.query_exists()) {
             var data_input = new DataInputStream(file.read());
             for (string? key = ""; (key = data_input.read_line()) != null; known_hosts.add(key));
-        }
+        } else if (!file.get_parent().query_exists()) file.make_directory_with_parents();
 
         foreach (var key in known_hosts) server_keys.remove(key);
         

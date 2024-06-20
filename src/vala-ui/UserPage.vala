@@ -100,6 +100,7 @@ namespace Gitlink {
                         Git.Client.get_default().wipe_user(user);
                         logged_out();
                     }
+                    logout_banner.revealed = false;
                 }
             });
         }

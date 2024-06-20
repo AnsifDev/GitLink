@@ -13,12 +13,14 @@ template $GitlinkUserPage : Adw.NavigationPage {
       Button {
         icon-name: "settings-symbolic";
         clicked => $preferences();
+        tooltip-text: "App Settings";
       }
       
       [start]
       Button {
         icon-name: "application-exit-rtl-symbolic";
         clicked => $logout();
+        tooltip-text: "Logout";
       }
     }
 
@@ -26,6 +28,7 @@ template $GitlinkUserPage : Adw.NavigationPage {
     Adw.Banner logout_banner {
       title: "You are logged in on a lab machine";
       button-label: "Logout";
+      button-clicked => $logout();
     }
 
     content: ScrolledWindow {
